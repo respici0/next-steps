@@ -1,9 +1,5 @@
-'use client'
+"use client";
 
 export function NavBar() {
-    return (
-        <nav>
-          Nav Bar
-        </nav>
-    )
+  return <nav>Nav Bar</nav>;
 }
