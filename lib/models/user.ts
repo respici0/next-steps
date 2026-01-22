@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-const User = mongoose.models.User || mongoose.model('User', userSchema);
+export type UserDoc = mongoose.InferSchemaType<typeof userSchema> & {_id: mongoose.Types.ObjectId};
+
+const User = (mongoose.models.User as mongoose.Model<UserDoc>) || mongoose.model<UserDoc>('User', userSchema);
 
 export default User;
