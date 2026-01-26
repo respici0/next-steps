@@ -23,8 +23,14 @@ const jobApplicationSchema = new mongoose.Schema(
   },
 );
 
-const JobApplication =
-  mongoose.models.JobApplication ||
+export type JobApplicationsDoc = mongoose.InferSchemaType<
+  typeof jobApplicationSchema
+> & {
+  _id: mongoose.Types.ObjectId;
+};
+
+const JobApplications =
+  (mongoose.models.JobApplication as mongoose.Model<JobApplicationsDoc>) ||
   mongoose.model("JobApplication", jobApplicationSchema);
 
-export default JobApplication;
+export default JobApplications;
