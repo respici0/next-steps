@@ -2,7 +2,7 @@
 import Link from "next/link";
 import User, { type UserDoc } from "@/lib/models/user";
 
-type Id = { id: string };
+type Id = { _id: string };
 type User = Id & Omit<UserDoc, "_id">;
 
 export function NavBar({ user }: { user: User | null }) {
