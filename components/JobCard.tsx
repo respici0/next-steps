@@ -13,7 +13,6 @@ export function JobCard() {
     <Card className="m-2">
       <CardHeader>
         <CardTitle>Frontend Engineer</CardTitle>
-
         <CardDescription>Google</CardDescription>
         <CardContent>Information goes here</CardContent>
       </CardHeader>
