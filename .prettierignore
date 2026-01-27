@@ -1,0 +1,44 @@
+# Files and folders to ignore for Prettier
+# See https://prettier.io/docs/en/ignore.html
+
+# Node / build artifacts
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+
+# Lock files (we'll ignore pnpm lock as requested)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# VCS and OS files
+.DS_Store
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Generated/minified files
+*.min.js
+*.map
+
+# Static assets (binary files)
+public/**/*.png
+public/**/*.jpg
+public/**/*.jpeg
+public/**/*.gif
+public/**/*.svg
+public/**/*.ico
+
+# Editor / system directories
+.vscode/
+.idea/
+
+# Misc
+*.lock
+*.pem

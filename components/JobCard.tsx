@@ -1,7 +1,21 @@
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
 export function JobCard() {
   return (
-    <div className="border-2 border-yellow-200 bg-white text-black rounded-md h-64">
-      <p>Card job here</p>
-    </div>
+    <Card className="m-2">
+      <CardHeader>
+        <CardTitle>Frontend Engineer</CardTitle>
+        <CardDescription>Google</CardDescription>
+        <CardContent>Information goes here</CardContent>
+      </CardHeader>
+    </Card>
   );
 }
