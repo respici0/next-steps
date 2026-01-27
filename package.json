@@ -38,9 +38,8 @@
     "typescript": "^5"
   },
   "lint-staged": {
-    "*.{js,ts,tsx,jsx,json,css,md}": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.{js,ts,tsx,jsx,css,md}": [
+      "prettier --write"
+     ]
   }
 }
