@@ -40,6 +40,6 @@
   "lint-staged": {
     "*.{js,ts,tsx,jsx,css,md}": [
       "prettier --write"
-     ]
+    ]
   }
 }
