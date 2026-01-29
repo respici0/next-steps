@@ -1,16 +1,20 @@
 'use server';
 
 import dbConnect from '../db/mongo';
-import JobApplications, { type JobApplicationsDoc } from '../models/jobApplications';
+import JobApplications, { type Job } from '../models/jobApplications';
 // import { notFound } from "next/navigation";
 
-export async function getAllJobApplications(): Promise<JobApplicationsDoc[] | null> {
+export async function getAllJobApplications(): Promise<Job[] | null> {
   await dbConnect();
   try {
-    console.log('TODO: get all job applications');
-
-    const jobApplications = await JobApplications.find();
-    return jobApplications as unknown as JobApplicationsDoc[] | null;
+    const jobApplications = await JobApplications.find().lean<Job[]>().exec();
+    const jobs = jobApplications.map((job: Job) => ({
+      ...job,
+      _id: job._id.toString(),
+      userId: job.userId.toString(),
+    }));
+    console.log('lean', jobs);
+    return jobs as Job[] | null;
   } catch (error) {
     console.error('TODO: error', error);
     return null;

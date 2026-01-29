@@ -1,12 +1,9 @@
+'use client';
 import { useState } from 'react';
-import { JobApplicationsDoc } from '@/lib/models/jobApplications';
+import { type Job } from '@/lib/models/jobApplications';
 import { JobColumn } from './JobColumn';
 
-type Jobs = {
-  jobs: JobApplicationsDoc[];
-};
-
-export function JobBoard({ jobs }: Jobs) {
+export function JobBoard({ jobs }: { jobs: Job[] }) {
   const [applied, setApplied] = useState([]);
   const [interviewing, setInterviewing] = useState([]);
   const [offered, setOffered] = useState([]);

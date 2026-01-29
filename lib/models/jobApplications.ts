@@ -27,6 +27,9 @@ export type JobApplicationsDoc = mongoose.InferSchemaType<typeof jobApplicationS
   _id: mongoose.Types.ObjectId;
 };
 
+type Ids = { _id: string; userId: string };
+export type Job = Ids & Omit<JobApplicationsDoc, '_id' | '_userId'>;
+
 const JobApplications =
   (mongoose.models.JobApplication as mongoose.Model<JobApplicationsDoc>) ||
   mongoose.model('JobApplication', jobApplicationSchema);

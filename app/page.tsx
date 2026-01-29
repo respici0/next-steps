@@ -1,11 +1,13 @@
 import { getAllJobApplications } from '@/lib/server-actions/jobApplications';
 import { JobBoard } from '@/components/JobBoard';
-import { useState } from 'react';
+import { type Job } from '@/lib/models/jobApplications';
 
 export default async function Home() {
   const jobApplications = await getAllJobApplications();
-
-  console.log(jobApplications);
+  // console.log('job', jobApplications)
+  // const job = jobApplications?.map((jobApplication: Job))
+  // const jobs = {...jobApplications, id: jobApplications}
+  // console.log(jobApplications);
   return (
     <div className="bg-zinc-600">
       <main className="w-full p-4 min-h-screen">
