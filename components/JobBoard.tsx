@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import { JobColumn } from './JobColumn';
-import { Card } from './ui/card';
+import { Card, CardHeader, CardTitle } from './ui/card';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
 
@@ -104,8 +104,10 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         onDragStart={(e) => handleDragStart(e, id)}
         className="bg-white p-4 rounded-md mb-2 shadow cursor-grab gap-1"
       >
-        <div className="font-semibold">{job.jobTitle ?? 'Untitled'}</div>
-        <div className="text-sm text-muted-foreground">{job.company ?? ''}</div>
+        <CardHeader>
+          <CardTitle className="font-semibold">{job.jobTitle ?? 'Untitled'}</CardTitle>
+          <CardTitle className="text-sm text-muted-foreground">{job.company ?? ''}</CardTitle>
+        </CardHeader>
       </Card>
     );
   }
