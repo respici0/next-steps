@@ -13,10 +13,8 @@ export async function getAllJobApplications(): Promise<Job[] | null> {
       _id: job._id.toString(),
       userId: job.userId.toString(),
     }));
-    console.log('lean', jobs);
     return jobs as Job[] | null;
   } catch (error) {
-    console.error('TODO: error', error);
     return null;
     // notFound();
   }

@@ -1,14 +1,23 @@
-import { JobCard } from './JobCard';
+import { ColumnKey } from './JobBoard';
 
 type Props = {
   name: string;
+  columnKey: ColumnKey;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent, toColumn: ColumnKey) => void;
+  children: React.ReactNode;
 };
 
-export function JobColumn({ name }: Props) {
+export function JobColumn({ name, columnKey, onDragOver, onDrop, children }: Props) {
   return (
-    <div className="p-2 bg-white rounded-md border-2">
-      <div className="font-extrabold sticky top-0">{name}</div>
-      <div>{/* Array of jobs here, going to make it drag and droppable */}</div>
+    <div
+      id={name}
+      className="p-2 bg-white rounded-md border-2"
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, columnKey)}
+    >
+      <div className="font-extrabold sticky top-0 mb-4">{name}</div>
+      {children}
     </div>
   );
 }
