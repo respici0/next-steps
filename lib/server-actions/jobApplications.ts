@@ -1,22 +1,26 @@
-"use server";
+'use server';
 
-import dbConnect from "../db/mongo";
-import JobApplication from "../models/jobApplications"
-import { notFound } from "next/navigation";
+import dbConnect from '../db/mongo';
+import JobApplications, { type Job } from '../models/jobApplications';
+// import { notFound } from "next/navigation";
 
-export async function getAllJobApplications() {
-    await dbConnect();
+export async function getAllJobApplications(): Promise<Job[] | null> {
+  await dbConnect();
   try {
-    console.log("TODO: get all job applications");
-    const jobApplications = await JobApplication.find();
-    return jobApplications;
+    const jobApplications = await JobApplications.find().lean<Job[]>().exec();
+    const jobs = jobApplications.map((job: Job) => ({
+      ...job,
+      _id: job._id.toString(),
+      userId: job.userId.toString(),
+    }));
+    return jobs as Job[] | null;
   } catch (error) {
-    console.error("TODO: error", error);
-    notFound();
+    return null;
+    // notFound();
   }
 }
 
-// NOTES 
+// NOTES
 
 // the job app tracking portion, with lanes and cards
 // eventually a table

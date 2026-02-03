@@ -1,14 +1,14 @@
-"use client";
-import Link from "next/link";
-import User, { type UserDoc } from "@/lib/models/user";
+'use client';
+import Link from 'next/link';
+import User, { type UserDoc } from '@/lib/models/user';
 
-type Id = { id: string };
-type User = Id & Omit<UserDoc, "_id">;
+type Id = { _id: string };
+type User = Id & Omit<UserDoc, '_id'>;
 
 export function NavBar({ user }: { user: User | null }) {
-  const firstLetter = user?.name?.charAt(0) ?? "";
+  const firstLetter = user?.name?.charAt(0) ?? '';
   return (
-    <nav>
+    <nav className="border-b-2">
       <div className="px-4 py-1 flex items-center justify-between">
         <Link href="/">
           <p className="text-black">Logo</p>
