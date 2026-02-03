@@ -8,7 +8,7 @@ type User = Id & Omit<UserDoc, '_id'>;
 export function NavBar({ user }: { user: User | null }) {
   const firstLetter = user?.name?.charAt(0) ?? '';
   return (
-    <nav>
+    <nav className="border-b-2">
       <div className="px-4 py-1 flex items-center justify-between">
         <Link href="/">
           <p className="text-black">Logo</p>

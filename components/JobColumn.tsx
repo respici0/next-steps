@@ -12,7 +12,7 @@ export function JobColumn({ name, columnKey, onDragOver, onDrop, children }: Pro
   return (
     <div
       id={name}
-      className="p-2 bg-white rounded-md border-2"
+      className="p-2 bg-white rounded-md border"
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, columnKey)}
     >
