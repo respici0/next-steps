@@ -8,13 +8,13 @@ if (!MONGODB_URI) {
   );
 }
 
-let cached = (global as any).mongoose;
+let cached = global.mongoose;
 
 if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function dbConnect() {
+async function dbConnect(): Promise<mongoose.Mongoose> {
   console.log("Connecting to MongoDB...");
   if (cached.conn) {
     console.log("Using cached MongoDB connection");
@@ -39,6 +39,7 @@ async function dbConnect() {
     throw e;
   }
   console.log("MongoDB connected");
+
   return cached.conn;
 }
 
