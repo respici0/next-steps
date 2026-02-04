@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import { JobColumn } from './JobColumn';
 import { Card, CardHeader, CardTitle } from './ui/card';
+import { updateJob } from '@/lib/server-actions/jobApplications';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
 
@@ -74,8 +75,8 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         setRejectedJobs((prev) => [updatedJob, ...prev]);
         break;
     }
-
-    // TODO: persist change to backend (call server action / API)
+    // we can improve performance here by debouncing this call  until the drag and drop have stopped
+    updateJob(job._id, updatedJob);
   }
 
   function handleDragStart(e: React.DragEvent, jobId: string) {

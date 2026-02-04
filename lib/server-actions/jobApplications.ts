@@ -20,6 +20,18 @@ export async function getAllJobApplications(): Promise<Job[] | null> {
   }
 }
 
+export async function updateJob(_id: string, job: Job): Promise<void> {
+  await dbConnect();
+  console.log({ _id, job });
+  try {
+    const res = await JobApplications.updateOne({ _id }, job);
+    console.log('res', res);
+    res.acknowledged;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 // NOTES
 
 // the job app tracking portion, with lanes and cards
