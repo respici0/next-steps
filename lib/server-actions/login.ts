@@ -9,10 +9,14 @@ import { redirect } from 'next/navigation';
 
 import type { SignInFormData, SignUpFormData } from '../types/login';
 
+async function getAuth() {
+  const db = await dbConnect();
+  return getAuthServer(db.connection.getClient());
+}
+
 export async function createUserWithEmail(formData: FormData) {
   try {
-    const db = await dbConnect();
-    const authServer = getAuthServer(db.connection.getClient());
+    const authServer = await getAuth();
 
     const newUser: SignUpFormData = {
       email: formData.get('email')?.toString() || '',
@@ -40,8 +44,7 @@ export async function createUserWithEmail(formData: FormData) {
 
 export async function loginUser(formData: FormData) {
   try {
-    const db = await dbConnect();
-    const authServer = getAuthServer(db.connection.getClient());
+    const authServer = await getAuth();
 
     const newUser: SignInFormData = {
       email: formData.get('email')?.toString() || '',
@@ -68,8 +71,7 @@ export async function loginUser(formData: FormData) {
 }
 
 export async function getUserSession() {
-  const db = await dbConnect();
-  const authServer = getAuthServer(db.connection.getClient());
+  const authServer = await getAuth();
 
   return await authServer.api.getSession({
     headers: await headers(),
@@ -77,8 +79,7 @@ export async function getUserSession() {
 }
 
 export async function logoutUser() {
-  const db = await dbConnect();
-  const authServer = getAuthServer(db.connection.getClient());
+  const authServer = await getAuth();
 
   await authServer.api.signOut({
     headers: await headers(),
