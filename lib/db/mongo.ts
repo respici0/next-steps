@@ -1,11 +1,9 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.DB_HOST || "";
+const MONGODB_URI = process.env.DB_HOST || '';
 
 if (!MONGODB_URI) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local",
-  );
+  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
 let cached = global.mongoose;
@@ -14,15 +12,15 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function dbConnect(): Promise<mongoose.Mongoose> {
-  console.log("Connecting to MongoDB...");
+async function dbConnect() {
+  console.log('Connecting to MongoDB...');
   if (cached.conn) {
-    console.log("Using cached MongoDB connection");
+    console.log('Using cached MongoDB connection');
     return cached.conn;
   }
 
   if (!cached.promise) {
-    console.log("Creating new MongoDB connection");
+    console.log('Creating new MongoDB connection');
     const opts = {
       bufferCommands: false,
     };
@@ -35,11 +33,10 @@ async function dbConnect(): Promise<mongoose.Mongoose> {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
-    console.error("MongoDB connection error:", e);
+    console.error('MongoDB connection error:', e);
     throw e;
   }
-  console.log("MongoDB connected");
-
+  console.log('MongoDB connected');
   return cached.conn;
 }
 

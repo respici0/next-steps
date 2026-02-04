@@ -1,6 +1,6 @@
-import { getAuthServer } from "@/lib/auth/authServer";
-import dbConnect from "@/lib/db/mongo";
-import { toNextJsHandler } from "better-auth/next-js";
+import { getAuthServer } from '@/lib/auth/authServer';
+import dbConnect from '@/lib/db/mongo';
+import { toNextJsHandler } from 'better-auth/next-js';
 
 const db = await dbConnect();
 const auth = getAuthServer(db.connection.getClient());

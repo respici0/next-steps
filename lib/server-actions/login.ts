@@ -1,12 +1,13 @@
-"use server";
+'use server';
 
-import { getAuthServer } from "../auth/authServer";
-import dbConnect from "../db/mongo";
-import { SignInSchema, SignUpSchema } from "../zod-schemas";
-import { z } from "zod";
+import { getAuthServer } from '../auth/authServer';
+import dbConnect from '../db/mongo';
+import { SignInSchema, SignUpSchema } from '../zod-schemas';
+import { z } from 'zod';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 
-import type { SignInFormData, SignUpFormData } from "../types/login";
-import { headers } from "next/headers";
+import type { SignInFormData, SignUpFormData } from '../types/login';
 
 export async function createUserWithEmail(formData: FormData) {
   try {
@@ -14,9 +15,9 @@ export async function createUserWithEmail(formData: FormData) {
     const authServer = getAuthServer(db.connection.getClient());
 
     const newUser: SignUpFormData = {
-      email: formData.get("email")?.toString() || "",
-      password: formData.get("password")?.toString() || "",
-      confirmPassword: formData.get("confirmPassword")?.toString() || "",
+      email: formData.get('email')?.toString() || '',
+      password: formData.get('password')?.toString() || '',
+      confirmPassword: formData.get('confirmPassword')?.toString() || '',
     };
 
     SignUpSchema.parse(newUser);
@@ -32,9 +33,7 @@ export async function createUserWithEmail(formData: FormData) {
     if (error instanceof z.ZodError) {
       return error.issues;
     } else {
-      throw new Error(
-        `Sign Up Failed${error instanceof Error ? `: ${error.message}` : ""}`,
-      );
+      throw new Error(`Sign Up Failed${error instanceof Error ? `: ${error.message}` : ''}`);
     }
   }
 }
@@ -45,8 +44,8 @@ export async function loginUser(formData: FormData) {
     const authServer = getAuthServer(db.connection.getClient());
 
     const newUser: SignInFormData = {
-      email: formData.get("email")?.toString() || "",
-      password: formData.get("password")?.toString() || "",
+      email: formData.get('email')?.toString() || '',
+      password: formData.get('password')?.toString() || '',
     };
 
     console.log(newUser);
@@ -63,9 +62,7 @@ export async function loginUser(formData: FormData) {
     if (error instanceof z.ZodError) {
       return error.issues;
     } else {
-      throw new Error(
-        `Sign Up Failed${error instanceof Error ? `: ${error.message}` : ""}`,
-      );
+      throw new Error(`Sign In Failed${error instanceof Error ? `: ${error.message}` : ''}`);
     }
   }
 }
@@ -77,4 +74,14 @@ export async function getUserSession() {
   return await authServer.api.getSession({
     headers: await headers(),
   });
+}
+
+export async function logoutUser() {
+  const db = await dbConnect();
+  const authServer = getAuthServer(db.connection.getClient());
+
+  await authServer.api.signOut({
+    headers: await headers(),
+  });
+  redirect('/login');
 }

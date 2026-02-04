@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
@@ -17,7 +17,6 @@ export type UserDoc = mongoose.InferSchemaType<typeof userSchema> & {
 };
 
 const User =
-  (mongoose.models.User as mongoose.Model<UserDoc>) ||
-  mongoose.model<UserDoc>("User", userSchema);
+  (mongoose.models.User as mongoose.Model<UserDoc>) || mongoose.model<UserDoc>('User', userSchema);
 
 export default User;
