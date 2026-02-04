@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import { JobColumn } from './JobColumn';
-import { Card, CardHeader, CardTitle } from './ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { updateJob } from '@/lib/server-actions/jobApplications';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
@@ -108,6 +108,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         <CardHeader>
           <CardTitle className="font-semibold">{job.jobTitle ?? 'Untitled'}</CardTitle>
           <CardTitle className="text-sm text-muted-foreground">{job.company ?? ''}</CardTitle>
+          <CardDescription className="text-xs text-black">{job.notes}</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -115,11 +116,18 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
 
   return (
     <div className="md:grid md:grid-cols-4 gap-2">
-      <JobColumn name="Applied" columnKey="applied" onDragOver={handleDragOver} onDrop={handleDrop}>
+      <JobColumn
+        name="Applied"
+        count={appliedJobs.length}
+        columnKey="applied"
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         {appliedJobs.map((job) => jobCard(job))}
       </JobColumn>
       <JobColumn
         name="Interviewing"
+        count={interviewingJobs.length}
         columnKey="interviewing"
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'interviewing')}
@@ -128,6 +136,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
       </JobColumn>
       <JobColumn
         name="Offered"
+        count={offeredJobs.length}
         columnKey="offered"
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'offered')}
@@ -136,6 +145,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
       </JobColumn>
       <JobColumn
         name="Rejected"
+        count={rejectedJobs.length}
         columnKey="rejected"
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'rejected')}
