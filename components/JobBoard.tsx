@@ -115,7 +115,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   return (
     <div className="md:grid md:grid-cols-4 gap-2">
       <JobColumn name="Applied" columnKey="applied" onDragOver={handleDragOver} onDrop={handleDrop}>
-        <div>{appliedJobs.map((job) => jobCard(job))}</div>
+        {appliedJobs.map((job) => jobCard(job))}
       </JobColumn>
       <JobColumn
         name="Interviewing"
@@ -123,7 +123,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'interviewing')}
       >
-        <div>{interviewingJobs.map((job) => jobCard(job))}</div>
+        {interviewingJobs.map((job) => jobCard(job))}
       </JobColumn>
       <JobColumn
         name="Offered"
@@ -131,7 +131,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'offered')}
       >
-        <div>{offeredJobs.map((job) => jobCard(job))}</div>
+        {offeredJobs.map((job) => jobCard(job))}
       </JobColumn>
       <JobColumn
         name="Rejected"
@@ -139,7 +139,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'rejected')}
       >
-        <div>{rejectedJobs.map((job) => jobCard(job))}</div>
+        {rejectedJobs.map((job) => jobCard(job))}
       </JobColumn>
     </div>
   );
