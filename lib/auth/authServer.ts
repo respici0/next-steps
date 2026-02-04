@@ -10,9 +10,26 @@ export function getAuthServer(client: MongoClient) {
   if (!authServer) {
     authServer = betterAuth({
       baseURL: process.env.BETTER_AUTH_URL,
-      database: mongodbAdapter(client.db(), {
+      database: mongodbAdapter(client.db(undefined), {
         client,
+        usePlural: true,
       }),
+      user: {
+        additionalFields: {
+          role: {
+            type: "string",
+            required: false,
+            defaultValue: "user",
+            input: false,
+          },
+          isActive: {
+            type: "boolean",
+            required: true,
+            defaultValue: true,
+            input: false,
+          },
+        },
+      },
       emailAndPassword: {
         enabled: true,
       },

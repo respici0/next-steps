@@ -11,7 +11,7 @@ export default async function Login() {
       <Card className="w-108">
         <Tabs defaultValue="signIn">
           <TabsList className="mb-6 ml-6">
-            <TabsTrigger value="signIn">Sign In</TabsTrigger>
+            <TabsTrigger value="signIn">Login</TabsTrigger>
             <TabsTrigger value="signUp">Sign Up</TabsTrigger>
           </TabsList>
           <TabsContent value="signIn">

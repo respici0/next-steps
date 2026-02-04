@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useState, useActionState } from "react";
+import { z } from "zod";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -15,12 +16,45 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { getAuthClient } from "@/lib/auth/authClient";
+import { Spinner } from "@/components/ui/spinner";
+
+import { loginUser } from "@/lib/server-actions/login";
 import OrDivider from "./OrDivider";
+import { redirect } from "next/navigation";
+import { getFieldErrors } from "../_utils";
 
 export default function SignInForm() {
-  const { signIn } = getAuthClient();
+  const [formErrors, setFormErrors] = useState<z.core.$ZodIssue[] | undefined>(
+    undefined,
+  );
+
+  const signInWithEmail = async (
+    previousState: FormData,
+    formData: FormData,
+  ) => {
+    previousState = formData;
+    let newValidationErrors: typeof formErrors = undefined;
+
+    try {
+      newValidationErrors = await loginUser(formData);
+      setFormErrors(newValidationErrors);
+    } catch (error) {
+      alert(error);
+      return previousState;
+    }
+    if (!newValidationErrors) {
+      redirect("/");
+    }
+    return previousState;
+  };
+
+  const [formActionState, formAction, pending] = useActionState(
+    signInWithEmail,
+    new FormData(),
+  );
+
+  const emailFieldErrors = getFieldErrors("email", formErrors);
+  const passwordFieldErrors = getFieldErrors("password", formErrors);
 
   return (
     <>
@@ -31,18 +65,21 @@ export default function SignInForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form action={formAction}>
           <FieldGroup>
-            <Field>
+            <Field data-invalid={!!emailFieldErrors?.length}>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
                 type="email"
+                name="email"
                 placeholder="m@example.com"
                 required
+                aria-invalid={!!emailFieldErrors?.length}
+                defaultValue={formActionState.get("email")?.toString() || ""}
               />
             </Field>
-            <Field>
+            <Field data-invalid={!!passwordFieldErrors?.length}>
               <div className="flex items-center">
                 <FieldLabel htmlFor="password">Password</FieldLabel>
                 <a
@@ -51,11 +88,21 @@ export default function SignInForm() {
                   Forgot your password?
                 </a>
               </div>
-              <Input id="password" type="password" required />
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                required
+                aria-invalid={!!passwordFieldErrors?.length}
+                defaultValue={formActionState.get("password")?.toString() || ""}
+              />
             </Field>
 
             <Field className="gap-8">
-              <Button type="submit">Login</Button>
+              <Button type="submit" className="flex flex-row">
+                {" "}
+                {pending && <Spinner />}Login
+              </Button>
               <OrDivider />
               <Button variant="outline" type="button">
                 Login with Google

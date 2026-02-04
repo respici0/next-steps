@@ -25,13 +25,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const _user = await getUser();
-  const user = _user ? { ..._user, id: String(_user._id) } : null;
+  const user = _user ? JSON.parse(JSON.stringify(_user)) : null;
 
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <header className="sticky top-0 z-50 bg-white/90 backdrop-blur">
           <NavBar user={user} />
         </header>

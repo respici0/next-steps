@@ -1,5 +1,6 @@
 "use client";
 
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   CardContent,
@@ -14,15 +15,51 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { getAuthClient } from "@/lib/auth/authClient";
+import { Spinner } from "@/components/ui/spinner";
 import OrDivider from "./OrDivider";
+import { z } from "zod";
+import { createUserWithEmail } from "@/lib/server-actions/login";
+import ErrorList from "./ErrorList";
+import { redirect } from "next/navigation";
+import { getFieldErrors } from "../_utils";
 
 export default function SignUpForm() {
-  const { signUp, useSession } = getAuthClient();
+  const [formErrors, setFormErrors] = useState<z.core.$ZodIssue[] | undefined>(
+    undefined,
+  );
 
-  const { isPending, error } = useSession.get();
+  const signUpWithEmail = async (
+    previousState: FormData,
+    formData: FormData,
+  ) => {
+    previousState = formData;
+    let newValidationErrors: typeof formErrors = undefined;
 
-  const submit = async (formData: FormData) => {};
+    try {
+      newValidationErrors = await createUserWithEmail(formData);
+      setFormErrors(newValidationErrors);
+    } catch (error) {
+      alert(error);
+      return previousState;
+    } finally {
+      if (!newValidationErrors) {
+        redirect("/");
+      }
+      return previousState;
+    }
+  };
+
+  const [formActionState, formAction, pending] = useActionState(
+    signUpWithEmail,
+    new FormData(),
+  );
+
+  const emailFieldErrors = getFieldErrors("email", formErrors);
+  const passwordFieldErrors = getFieldErrors("password", formErrors);
+  const confirmPasswordFieldErrors = getFieldErrors(
+    "confirmPassword",
+    formErrors,
+  );
 
   return (
     <>
@@ -33,9 +70,9 @@ export default function SignUpForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={submit}>
+        <form action={formAction}>
           <FieldGroup>
-            <Field>
+            <Field data-invalid={!!emailFieldErrors?.length}>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
@@ -43,16 +80,27 @@ export default function SignUpForm() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                defaultValue={formActionState.get("email")?.toString() || ""}
+                aria-invalid={!!emailFieldErrors?.length}
+              />
+              <ErrorList errors={emailFieldErrors} />
+            </Field>
+            <Field data-invalid={!!passwordFieldErrors?.length}>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                required
+                defaultValue={formActionState.get("password")?.toString() || ""}
+                aria-invalid={!!passwordFieldErrors?.length}
+              />
+              <ErrorList
+                placeholder="Must be at least 8 characters long."
+                errors={passwordFieldErrors}
               />
             </Field>
-            <Field>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input id="password" type="password" name="password" required />
-              <FieldDescription>
-                Must be at least 8 characters long.
-              </FieldDescription>
-            </Field>
-            <Field>
+            <Field data-invalid={!!confirmPasswordFieldErrors?.length}>
               <FieldLabel htmlFor="confirm-password">
                 Confirm Password
               </FieldLabel>
@@ -61,16 +109,31 @@ export default function SignUpForm() {
                 type="password"
                 required
                 name="confirmPassword"
+                aria-invalid={!!confirmPasswordFieldErrors?.length}
+                defaultValue={
+                  formActionState.get("confirmPassword")?.toString() || ""
+                }
               />
-              <FieldDescription>Please confirm your password.</FieldDescription>
+              <ErrorList
+                placeholder="Please confirm your password."
+                errors={confirmPasswordFieldErrors}
+              />
             </Field>
             <FieldGroup>
               <Field className="gap-8">
-                <Button type="submit">Create Account</Button>
+                <Button
+                  type="submit"
+                  disabled={pending}
+                  className="flex flex-row">
+                  {pending && <Spinner />} Create Account
+                </Button>
                 <OrDivider />
-
-                <Button variant="outline" type="button">
-                  Sign up with Google
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={pending}
+                  className="flex flex-row">
+                  {pending && <Spinner />} Sign up with Google
                 </Button>
                 <FieldDescription className="px-6 text-center">
                   Already have an account? <a href="#">Sign in</a>
