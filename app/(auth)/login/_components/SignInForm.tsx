@@ -8,10 +8,10 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 
-import { loginUser } from '@/lib/server-actions/login';
+import { loginUserWithEmail } from '@/lib/server-actions/login';
 import OrDivider from './OrDivider';
 import { redirect } from 'next/navigation';
-import { getFieldErrors } from '../_utils';
+import { getFieldErrors, signInWithGoogle } from '../_utils';
 
 export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) {
   const [formErrors, setFormErrors] = useState<z.core.$ZodIssue[] | undefined>(undefined);
@@ -21,7 +21,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
     let newValidationErrors: typeof formErrors = undefined;
 
     try {
-      newValidationErrors = await loginUser(formData);
+      newValidationErrors = await loginUserWithEmail(formData);
       setFormErrors(newValidationErrors);
     } catch (error) {
       alert(error);
@@ -80,11 +80,10 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
 
             <Field className="gap-8">
               <Button type="submit" className="flex flex-row">
-                {' '}
                 {pending && <Spinner />}Login
               </Button>
               <OrDivider />
-              <Button variant="outline" type="button">
+              <Button variant="outline" type="button" onClick={signInWithGoogle}>
                 Login with Google
               </Button>
               <FieldDescription className="text-center">
