@@ -7,7 +7,6 @@ export default async function LoginLayout({
   children: React.ReactNode;
 }>) {
   const session = await getUserSession();
-
   const user = session?.user;
 
   if (user) {
