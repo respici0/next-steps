@@ -1,8 +1,8 @@
-import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { nextCookies } from "better-auth/next-js";
+import { betterAuth } from 'better-auth';
+import { mongodbAdapter } from 'better-auth/adapters/mongodb';
+import { nextCookies } from 'better-auth/next-js';
 
-import type { MongoClient } from "mongodb";
+import type { MongoClient } from 'mongodb';
 
 let authServer: ReturnType<typeof betterAuth> | undefined = undefined;
 
@@ -17,13 +17,13 @@ export function getAuthServer(client: MongoClient) {
       user: {
         additionalFields: {
           role: {
-            type: "string",
+            type: 'string',
             required: false,
-            defaultValue: "user",
+            defaultValue: 'user',
             input: false,
           },
           isActive: {
-            type: "boolean",
+            type: 'boolean',
             required: true,
             defaultValue: true,
             input: false,
@@ -35,8 +35,10 @@ export function getAuthServer(client: MongoClient) {
       },
       socialProviders: {
         google: {
-          clientId: process.env.GOOGLE_CLIENT_ID_WEB || "",
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          accessType: 'offline',
+          prompt: 'select_account consent',
+          clientId: process.env.GOOGLE_CLIENT_ID_WEB || '',
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET_WEB,
         },
       },
       plugins: [nextCookies()],

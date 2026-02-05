@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { createUserWithEmail } from '@/lib/server-actions/login';
 import ErrorList from './ErrorList';
 import { redirect } from 'next/navigation';
-import { getFieldErrors } from '../_utils';
+import { getFieldErrors, signInWithGoogle } from '../_utils';
 
 export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
   const [formErrors, setFormErrors] = useState<z.core.$ZodIssue[] | undefined>(undefined);
@@ -103,6 +103,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                   type="button"
                   disabled={pending}
                   className="flex flex-row"
+                  onClick={signInWithGoogle}
                 >
                   {pending && <Spinner />} Sign up with Google
                 </Button>
