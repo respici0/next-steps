@@ -1,13 +1,20 @@
 'use server';
 
+import { getUser } from '../auth/getUser';
 import dbConnect from '../db/mongo';
 import JobApplications, { type Job } from '../models/jobApplications';
 // import { notFound } from "next/navigation";
 
+async function getUserId(): Promise<string> {
+  const { id } = await getUser();
+  return id;
+}
+
 export async function getAllJobApplications(): Promise<Job[] | null> {
+  const userId = await getUserId();
   await dbConnect();
   try {
-    const jobApplications = await JobApplications.find().lean<Job[]>().exec();
+    const jobApplications = await JobApplications.find({ userId }).lean<Job[]>().exec();
     const jobs = jobApplications.map((job: Job) => ({
       ...job,
       _id: job._id.toString(),
