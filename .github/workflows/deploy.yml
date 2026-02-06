@@ -4,17 +4,17 @@ on:
   workflow_call:
     inputs:
       environment:
-        description: "Environment to deploy to (Preview/Production)"
+        description: 'Environment to deploy to (Preview/Production)'
         required: true
         type: string
       production:
-        description: "Deploy to production"
+        description: 'Deploy to production'
         required: false
         default: false
         type: boolean
     outputs:
       deployment-url:
-        description: "Deployment URL"
+        description: 'Deployment URL'
         value: ${{ jobs.deploy.outputs.deployment-url }}
 
 jobs:
@@ -34,8 +34,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: '22'
+          cache: 'npm'
 
       - name: Cache node_modules
         id: cache
@@ -55,12 +55,18 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          BETTER_AUTH_BASE_URL: ${{ vars.BETTER_AUTH_BASE_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          DB_HOST: ${{ env.DB_HOST }}
 
       - name: Build application with Vercel
         run: npx vercel build ${{ inputs.production && '--prod' || '' }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          BETTER_AUTH_BASE_URL: ${{ vars.BETTER_AUTH_BASE_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          DB_HOST: ${{ env.DB_HOST }}
 
       - name: Verify build output
         run: |
