@@ -3,7 +3,7 @@ export function getBaseUrl() {
     return process.env.AUTH_PROD_URL;
   }
 
-  if (process.env.VERCEN_ENV === 'preview') {
+  if (process.env.VERCEL_ENV === 'preview') {
     return `https://${process.env.VERCEL_URL}`;
   }
 
