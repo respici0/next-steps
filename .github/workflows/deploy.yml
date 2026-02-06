@@ -1,0 +1,85 @@
+name: 🚀 Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to deploy to (Preview/Production)"
+        required: true
+        type: string
+      production:
+        description: "Deploy to production"
+        required: false
+        default: false
+        type: boolean
+    outputs:
+      deployment-url:
+        description: "Deployment URL"
+        value: ${{ jobs.deploy.outputs.deployment-url }}
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.set-url.outputs.deployment-url }}
+    outputs:
+      deployment-url: ${{ steps.set-url.outputs.deployment-url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Cache node_modules
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Pull Vercel project settings
+        run: npx vercel pull --yes --environment=${{ inputs.production && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build application with Vercel
+        run: npx vercel build ${{ inputs.production && '--prod' || '' }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Verify build output
+        run: |
+          if [ ! -d ".vercel/output" ]; then
+            echo "❌ .vercel/output directory not found!"
+            exit 1
+          fi
+          echo "✅ Build output verified:"
+          ls -la .vercel/output/
+          echo "📦 Build artifacts ready for deployment"
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(npx vercel deploy --prebuilt ${{ inputs.production && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $DEPLOYMENT_URL"
+
+      - name: Set deployment URL
+        id: set-url
+        run: |
+          echo "deployment-url=${{ steps.deploy.outputs.url }}" >> $GITHUB_OUTPUT

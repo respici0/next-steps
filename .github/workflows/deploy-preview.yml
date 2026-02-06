@@ -1,0 +1,51 @@
+name: 👀 Deploy Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # test:
+  #   name: Run Tests
+  #   uses: ./.github/workflows/testing.yml
+  #   secrets: inherit
+
+  deploy:
+    name: Deploy Preview
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: 'Preview'
+      production: false
+    secrets: inherit
+
+  summary:
+    name: Preview Summary
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: needs.deploy.result == 'success'
+    steps:
+      - name: Preview Deployment Summary
+        run: |
+          echo "✅ Preview deployment completed!"
+
+          # Create GitHub workflow summary
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 👀 Preview Deployment Successful!
+
+          | Item | Details |
+          |------|---------|
+          | 🔗 **Preview URL** | [${{ needs.deploy.outputs.deployment-url }}](${{ needs.deploy.outputs.deployment-url }}) |
+          | 🔀 **Branch** | \`${{ github.head_ref || github.ref }}\` |
+
+          EOF
