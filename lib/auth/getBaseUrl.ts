@@ -1,6 +1,6 @@
 export function getBaseUrl() {
   if (process.env.VERCEL_ENV === 'production') {
-    return process.env.AUTH_PROD_URL;
+    return process.env.BETTER_AUTH_BASE_URL;
   }
 
   if (process.env.VERCEL_ENV === 'preview') {
