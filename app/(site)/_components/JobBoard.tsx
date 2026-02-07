@@ -2,8 +2,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import { JobColumn } from './JobColumn';
-import { Card, CardDescription, CardHeader, CardTitle } from './ui/card';
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card';
 import { updateJob } from '@/lib/server-actions/jobApplications';
+import { Badge } from '@/components/ui/badge';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
 
@@ -103,19 +111,27 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         key={id}
         draggable
         onDragStart={(e) => handleDragStart(e, id)}
-        className="bg-white p-4 rounded-md mb-2 shadow cursor-grab gap-1"
+        className="bg-white p-4 rounded-md mb-2 shadow cursor-grab gap-4"
       >
         <CardHeader>
+          <CardAction></CardAction>
           <CardTitle className="font-semibold">{job.jobTitle ?? 'Untitled'}</CardTitle>
           <CardTitle className="text-sm text-muted-foreground">{job.company ?? ''}</CardTitle>
           <CardDescription className="text-xs text-black">{job.notes}</CardDescription>
         </CardHeader>
+        <CardFooter className="flex justify-between items-center">
+          <p className="text-sm font-sans">Applied: 10/13/1989</p>
+          <Badge variant="default" className="text-sm font-sans font-medium">
+            10 days
+          </Badge>
+        </CardFooter>
       </Card>
     );
   }
 
   return (
     <div className="md:grid md:grid-cols-4 gap-2">
+      <h1 className="sr-only">Job Application Board</h1>
       <JobColumn
         name="Applied"
         count={appliedJobs.length}

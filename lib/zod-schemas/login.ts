@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const EmailSchema = z.email();
 
@@ -11,8 +11,8 @@ export const SignUpSchema = z
     confirmPassword: FormPasswordSchema.min(8),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });
 
 export const SignInSchema = z.object({

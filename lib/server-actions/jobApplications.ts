@@ -7,6 +7,9 @@ import JobApplications, { type Job } from '../models/jobApplications';
 
 async function getUserId(): Promise<string> {
   const { id } = await getUser();
+  if (!id) {
+    throw new Error('Unable to authorize user session');
+  }
   return id;
 }
 
@@ -14,6 +17,7 @@ export async function getAllJobApplications(): Promise<Job[] | null> {
   const userId = await getUserId();
   await dbConnect();
   try {
+    // const jobApplications = await JobApplications.find({ userId }).lean<Job[]>().exec();
     const jobApplications = await JobApplications.find({ userId }).lean<Job[]>().exec();
     const jobs = jobApplications.map((job: Job) => ({
       ...job,
@@ -28,6 +32,7 @@ export async function getAllJobApplications(): Promise<Job[] | null> {
 }
 
 export async function updateJob(_id: string, job: Job): Promise<void> {
+  await getUserId();
   await dbConnect();
   try {
     const res = await JobApplications.updateOne({ _id }, job);
@@ -35,6 +40,26 @@ export async function updateJob(_id: string, job: Job): Promise<void> {
   } catch (error) {
     console.error(error);
   }
+}
+
+export async function createJob(prevState: unknown, formData: FormData) {
+  const userId = await getUserId();
+  await dbConnect();
+
+  const appliedAt = formData.get('appliedAt');
+  const position = formData.get('position');
+  console.log({ appliedAt, position });
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  return {
+    success: true,
+    error: 'Something went wrong',
+  };
+  // try {
+  //   // await JobApplications.create({ userId });
+  // } catch (error) {
+  //   console.error();
+  // }
 }
 
 // NOTES

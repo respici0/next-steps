@@ -1,5 +1,5 @@
 import { getAllJobApplications } from '@/lib/server-actions/jobApplications';
-import { JobBoard } from '@/components/JobBoard';
+import { JobBoard } from '@/app/(site)/_components/JobBoard';
 
 export default async function Home() {
   // DEBUG: set to `true` to force a visible load delay so `app/loading.tsx` appears.

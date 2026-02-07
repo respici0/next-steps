@@ -1,5 +1,5 @@
-import { SignUpFormData, SignInFormData } from "@/lib/types/login";
-import { z } from "zod";
+import { SignUpFormData, SignInFormData } from '@/lib/types/login';
+import { z } from 'zod';
 
 export function getFieldErrors(
   field: keyof SignUpFormData | keyof SignInFormData,
