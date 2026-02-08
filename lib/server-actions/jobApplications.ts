@@ -5,6 +5,10 @@ import dbConnect from '../db/mongo';
 import JobApplications, { type Job } from '../models/jobApplications';
 // import { notFound } from "next/navigation";
 
+const mockPromise = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+};
+
 async function getUserId(): Promise<string> {
   const { id } = await getUser();
   if (!id) {
@@ -42,24 +46,44 @@ export async function updateJob(_id: string, job: Job): Promise<void> {
   }
 }
 
-export async function createJob(prevState: unknown, formData: FormData) {
+export async function createJob(
+  prevState: unknown,
+  formData: FormData,
+): Promise<{
+  success: boolean;
+  error: string | null;
+  job: Job | null;
+}> {
   const userId = await getUserId();
   await dbConnect();
 
-  const appliedAt = formData.get('appliedAt');
-  const position = formData.get('position');
-  console.log({ appliedAt, position });
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const rawData = Object.fromEntries(formData);
 
-  return {
-    success: true,
-    error: 'Something went wrong',
-  };
-  // try {
-  //   // await JobApplications.create({ userId });
-  // } catch (error) {
-  //   console.error();
-  // }
+  // console.log({appliedAt, position})
+
+  try {
+    const jobDoc = await JobApplications.create({ userId, ...rawData });
+
+    const job: Job = {
+      ...jobDoc.toObject(),
+      _id: jobDoc._id.toString(),
+      userId: jobDoc.userId.toString(),
+    };
+
+    console.log(job);
+    return {
+      success: true,
+      error: null,
+      job,
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      error: 'Something went wrong',
+      job: null,
+    };
+  }
 }
 
 // NOTES

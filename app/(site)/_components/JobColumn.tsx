@@ -4,18 +4,28 @@ import { ColumnKey } from './JobBoard';
 import { Button } from '../../../components/ui/button';
 import { Plus } from 'lucide-react';
 import CreateJobForm from './CreateJobForm';
+import { Job } from '@/lib/models/jobApplications';
 // import Modal from '../../../components/Modal';
 
 type Props = {
   name: string;
   count: number;
   columnKey: ColumnKey;
+  onJobCreated: (status: ColumnKey, job: Job) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, toColumn: ColumnKey) => void;
   children: React.ReactNode;
 };
 
-export function JobColumn({ name, count, columnKey, onDragOver, onDrop, children }: Props) {
+export function JobColumn({
+  name,
+  count,
+  columnKey,
+  onJobCreated,
+  onDragOver,
+  onDrop,
+  children,
+}: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -33,7 +43,13 @@ export function JobColumn({ name, count, columnKey, onDragOver, onDrop, children
         className={cn(count && 'overflow-auto py-1 px-2 max-h-[calc(100vh-10.5rem)]', 'py-1 px-2')}
       >
         {children}
-        {open && <CreateJobForm onClose={() => setOpen(false)} />}
+        {open && (
+          <CreateJobForm
+            columnKey={columnKey}
+            onJobCreated={onJobCreated}
+            onClose={() => setOpen(false)}
+          />
+        )}
       </div>
       {!open && (
         <div className="px-1 w-full items-center">

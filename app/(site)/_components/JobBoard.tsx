@@ -27,6 +27,13 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     return map;
   }, [jobs]);
 
+  const cachedJobsById = useMemo(() => {
+    const cachedJobs = [...appliedJobs, ...interviewingJobs, ...offeredJobs, ...rejectedJobs];
+    const map = new Map<string, Job>();
+    for (const job of cachedJobs) map.set(String((job as Job)._id ?? ''), job);
+    return map;
+  }, [appliedJobs, interviewingJobs, offeredJobs, rejectedJobs]);
+
   useEffect(() => {
     const appliedList: Job[] = [];
     const interviewingList: Job[] = [];
@@ -58,8 +65,27 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     setRejectedJobs(rejectedList);
   }, [jobs]);
 
+  function handleCreatedJob(status: ColumnKey, job: Job) {
+    switch (status) {
+      case 'applied':
+        setAppliedJobs((prev) => [...prev, job]);
+        break;
+      case 'interviewing':
+        setInterviewingJobs((prev) => [...prev, job]);
+        break;
+      case 'offered':
+        setOfferedJobs((prev) => [...prev, job]);
+        break;
+      case 'rejected':
+        setRejectedJobs((prev) => [...prev, job]);
+        break;
+      default:
+        break;
+    }
+  }
+
   function moveJob(jobId: string, toColumn: ColumnKey) {
-    const job = jobsById.get(jobId);
+    const job = jobsById.get(jobId) || cachedJobsById.get(jobId);
     if (!job) return;
 
     setAppliedJobs((prev) => prev.filter((job) => String((job as Job)._id ?? '') !== jobId));
@@ -100,6 +126,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   function handleDrop(e: React.DragEvent, toColumn: ColumnKey) {
     e.preventDefault();
     const jobId = e.dataTransfer.getData('text/plain');
+    console.log('da fuq', jobId);
     if (!jobId) return;
     moveJob(jobId, toColumn);
   }
@@ -111,7 +138,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         key={id}
         draggable
         onDragStart={(e) => handleDragStart(e, id)}
-        className="bg-white p-4 rounded-md mb-2 shadow cursor-grab gap-4"
+        className="bg-white rounded-md mb-2 shadow cursor-grab gap-4"
       >
         <CardHeader>
           <CardAction></CardAction>
@@ -120,7 +147,10 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
           <CardDescription className="text-xs text-black">{job.notes}</CardDescription>
         </CardHeader>
         <CardFooter className="flex justify-between items-center">
-          <p className="text-sm font-sans">Applied: 10/13/1989</p>
+          <p className="text-sm font-sans">
+            Applied: {job.appliedAt.getUTCMonth() + 1}/{job.appliedAt.getUTCDate()}/
+            {job.appliedAt.getUTCFullYear()}
+          </p>
           <Badge variant="default" className="text-sm font-sans font-medium">
             10 days
           </Badge>
@@ -136,6 +166,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         name="Applied"
         count={appliedJobs.length}
         columnKey="applied"
+        onJobCreated={handleCreatedJob}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
@@ -145,6 +176,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         name="Interviewing"
         count={interviewingJobs.length}
         columnKey="interviewing"
+        onJobCreated={handleCreatedJob}
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'interviewing')}
       >
@@ -154,6 +186,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         name="Offered"
         count={offeredJobs.length}
         columnKey="offered"
+        onJobCreated={handleCreatedJob}
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'offered')}
       >
@@ -163,6 +196,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         name="Rejected"
         count={rejectedJobs.length}
         columnKey="rejected"
+        onJobCreated={handleCreatedJob}
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'rejected')}
       >

@@ -8,21 +8,26 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { parseDateToMongoUTC, formatMMDDYYYY } from '@/lib/utils/date.utils';
 import { Spinner } from '@/components/ui/spinner';
+import { ColumnKey } from './JobBoard';
+import { type Job } from '@/lib/models/jobApplications';
 
 type Props = {
   onClose: () => void;
+  onJobCreated: (status: ColumnKey, job: Job) => void;
+  columnKey: ColumnKey;
 };
 
-export default function CreateJobForm({ onClose }: Props) {
+export default function CreateJobForm({ onClose, onJobCreated, columnKey }: Props) {
   const [state, formAction, isPending] = useActionState(createJob, undefined);
   const [displayDate, setDisplayDate] = useState('');
   const [utcDate, setUtcDate] = useState<string | null>(null);
 
   useEffect(() => {
-    if (state?.success && !isPending) {
+    if (state?.success && !isPending && state?.job) {
+      onJobCreated(columnKey, state.job);
       onClose();
     }
-  }, [state?.success, isPending]);
+  }, [state?.success, isPending, state?.job]);
 
   function handleDateChange(e: ChangeEvent<HTMLInputElement>) {
     const formatted = formatMMDDYYYY(e.target.value);
@@ -43,6 +48,7 @@ export default function CreateJobForm({ onClose }: Props) {
             if (utcDate) {
               formData.set('appliedAt', utcDate);
             }
+            formData.set('status', columnKey);
             formAction(formData);
           }}
         >
@@ -50,13 +56,13 @@ export default function CreateJobForm({ onClose }: Props) {
             <FieldGroup className="gap-1">
               <Field data-invalid={!![]?.length} className="gap-1">
                 <FieldLabel htmlFor="position" aria-required={true}>
-                  Position <span className="text-xs font-medium opacity-65">(required)</span>
+                  Job title<span className="text-xs font-medium opacity-65">(required)</span>
                 </FieldLabel>
                 <Input
-                  id="position"
+                  id="jobTitle"
                   type="text"
-                  name="position"
-                  placeholder="Position (e.g., Software Engineer)"
+                  name="jobTitle"
+                  placeholder="Job title (e.g., Software Engineer)"
                   required
                   aria-invalid={!![]?.length}
                 />
@@ -72,7 +78,6 @@ export default function CreateJobForm({ onClose }: Props) {
                   placeholder="Company name (e.g., Acme Corp)"
                   required
                   aria-invalid={!![]?.length}
-                  // defaultValue={state.get('email')?.toString() || ''}
                 />
               </Field>
               <Field data-invalid={!![]?.length} className="gap-1">
@@ -86,7 +91,6 @@ export default function CreateJobForm({ onClose }: Props) {
                   name="url"
                   placeholder="Job link (e.g., https://example.com)"
                   aria-invalid={!![]?.length}
-                  // defaultValue={state.get('email')?.toString() || ''}
                 />
               </Field>
               <Field data-invalid={!![]?.length} className="gap-1">
@@ -99,7 +103,6 @@ export default function CreateJobForm({ onClose }: Props) {
                   name="notes"
                   placeholder="Notes (e.g., concerns, next steps, reminders)"
                   aria-invalid={!![]?.length}
-                  // defaultValue={state.get('email')?.toString() || ''}
                 />
               </Field>
               <Field data-invalid={!![]?.length} className="gap-1">
