@@ -24,7 +24,7 @@ export function NavBar({ user }: { user: User | null }) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="border-2 flex items-center justify-center rounded-full border-black w-10 h-10"
+              className="border-2 flex items-center justify-center rounded-full border-black w-10 h-10 cursor-pointer"
             >
               <span className="text-black font-bold uppercase">{firstLetter}</span>
             </Button>

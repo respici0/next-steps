@@ -1,13 +1,14 @@
-"use client";
+'use client';
 
-import { createAuthClient } from "better-auth/client";
+import { createAuthClient } from 'better-auth/client';
+import { getBaseUrl } from './getBaseUrl';
 
 let authClient: ReturnType<typeof createAuthClient> | undefined = undefined;
 
 export function getAuthClient() {
   if (!authClient) {
     authClient = createAuthClient({
-      baseURL: process.env.BETTER_AUTH_URL,
+      baseURL: getBaseUrl(),
     });
   }
 

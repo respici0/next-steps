@@ -5,10 +5,10 @@ export function SkeletonCard() {
   return (
     <Card className="w-full p-4">
       <CardHeader>
-        <Skeleton className="h-6 w-2/3" />
+        <Skeleton className="h-6 bg-gray-200" />
       </CardHeader>
       <CardContent>
-        <Skeleton className="aspect-video w-full" />
+        <Skeleton className="w-full aspect-video bg-gray-200" />
       </CardContent>
     </Card>
   );
