@@ -51,8 +51,6 @@ export async function loginUser(formData: FormData) {
       password: formData.get('password')?.toString() || '',
     };
 
-    console.log(newUser);
-
     SignInSchema.parse(newUser);
 
     await authServer.api.signInEmail({

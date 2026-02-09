@@ -2,18 +2,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import JobColumn from './JobColumn';
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '../../../components/ui/card';
 import { updateJob } from '@/lib/server-actions/jobApplications';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { daysSinceUtc } from '@/lib/utils/calculateDaysPastFromMongoUTC';
+import { JobCard } from './JobCard';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
 
@@ -151,49 +141,8 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   function handleDrop(e: React.DragEvent, toColumn: ColumnKey) {
     e.preventDefault();
     const jobId = e.dataTransfer.getData('text/plain');
-    console.log('da fuq', jobId);
     if (!jobId) return;
     moveJob(jobId, toColumn);
-  }
-
-  function jobCard(job: Job) {
-    const id = String((job as Job)._id ?? '');
-    const appliedAt = `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/
-            ${job.appliedAt.getUTCFullYear()}`;
-
-    return (
-      <Card
-        key={id}
-        draggable
-        onDragStart={(e) => handleDragStart(e, id)}
-        className="bg-white rounded-md mb-2 shadow cursor-grab gap-1 font-sans py-4"
-      >
-        <CardHeader>
-          <CardTitle className="flex flex-col">
-            <span className="font-semibold text-2xl text-shadow-black">
-              {job.jobTitle ?? 'Untitled'}
-            </span>
-            <span className="text-sm font-medium text-muted-foreground">{job.company ?? ''}</span>
-          </CardTitle>
-          {job?.jobUrl && (
-            <CardDescription>
-              <Button variant="link" className="p-0 hover:opacity-60">
-                <a href={job?.jobUrl} target="_blank" rel="noopener noreferrer">
-                  Visit Job Posting
-                </a>
-              </Button>
-            </CardDescription>
-          )}
-          <CardDescription className="text-sm">{job.notes}</CardDescription>
-        </CardHeader>
-        <CardFooter className="flex justify-between items-center mt-1">
-          <p className="text-sm">Applied: {appliedAt}</p>
-          <Badge variant="default" className="text-sm font-medium">
-            {daysSinceUtc(job.appliedAt.toISOString())} days
-          </Badge>
-        </CardFooter>
-      </Card>
-    );
   }
 
   return (
@@ -209,7 +158,13 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        {appliedJobs.map((job) => jobCard(job))}
+        {appliedJobs.map((job) => (
+          <JobCard
+            key={String((job as Job)._id ?? '')}
+            job={job}
+            handleDragStart={handleDragStart}
+          />
+        ))}
       </JobColumn>
       <JobColumn
         name="Interviewing"
@@ -221,7 +176,13 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'interviewing')}
       >
-        {interviewingJobs.map((job) => jobCard(job))}
+        {interviewingJobs.map((job) => (
+          <JobCard
+            key={String((job as Job)._id ?? '')}
+            job={job}
+            handleDragStart={handleDragStart}
+          />
+        ))}
       </JobColumn>
       <JobColumn
         name="Offered"
@@ -233,7 +194,13 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'offered')}
       >
-        {offeredJobs.map((job) => jobCard(job))}
+        {offeredJobs.map((job) => (
+          <JobCard
+            key={String((job as Job)._id ?? '')}
+            job={job}
+            handleDragStart={handleDragStart}
+          />
+        ))}
       </JobColumn>
       <JobColumn
         name="Rejected"
@@ -245,7 +212,13 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'rejected')}
       >
-        {rejectedJobs.map((job) => jobCard(job))}
+        {rejectedJobs.map((job) => (
+          <JobCard
+            key={String((job as Job)._id ?? '')}
+            job={job}
+            handleDragStart={handleDragStart}
+          />
+        ))}
       </JobColumn>
     </div>
   );
