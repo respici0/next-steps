@@ -55,7 +55,7 @@ export async function createJob(
   await dbConnect();
 
   const rawData = Object.fromEntries(formData);
-
+  console.log(rawData);
   try {
     const jobDoc = await JobApplications.create({ userId, ...rawData });
 

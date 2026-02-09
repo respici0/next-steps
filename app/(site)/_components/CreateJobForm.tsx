@@ -86,14 +86,14 @@ export default function CreateJobForm({ onClose, onJobCreated, columnKey }: Prop
                 />
               </Field>
               <Field className="gap-1">
-                <FieldLabel htmlFor="url">
+                <FieldLabel htmlFor="jobUrl">
                   Where is this job posted?{' '}
                   <span className="text-xs font-medium opacity-65">(optional)</span>
                 </FieldLabel>
                 <Input
-                  id="url"
-                  type="url"
-                  name="url"
+                  id="jobUrl"
+                  type="text"
+                  name="jobUrl"
                   placeholder="Job link (e.g., https://example.com)"
                 />
               </Field>
