@@ -2,16 +2,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import { JobColumn } from './JobColumn';
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '../../../components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { updateJob } from '@/lib/server-actions/jobApplications';
-import { Badge } from '@/components/ui/badge';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
 
@@ -20,25 +12,12 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   const [interviewingJobs, setInterviewingJobs] = useState<Job[]>([]);
   const [offeredJobs, setOfferedJobs] = useState<Job[]>([]);
   const [rejectedJobs, setRejectedJobs] = useState<Job[]>([]);
-  const [openCreateForm, setOpenCreateForm] = useState({
-    applied: false,
-    interviewing: false,
-    offered: false,
-    rejected: false,
-  });
 
   const jobsById = useMemo(() => {
     const map = new Map<string, Job>();
     for (const job of jobs) map.set(String((job as Job)._id ?? ''), job);
     return map;
   }, [jobs]);
-
-  const cachedJobsById = useMemo(() => {
-    const cachedJobs = [...appliedJobs, ...interviewingJobs, ...offeredJobs, ...rejectedJobs];
-    const map = new Map<string, Job>();
-    for (const job of cachedJobs) map.set(String((job as Job)._id ?? ''), job);
-    return map;
-  }, [appliedJobs, interviewingJobs, offeredJobs, rejectedJobs]);
 
   useEffect(() => {
     const appliedList: Job[] = [];
@@ -71,44 +50,8 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     setRejectedJobs(rejectedList);
   }, [jobs]);
 
-  function handleCreateForm(columnKey: ColumnKey) {
-    setOpenCreateForm((prevObj) => {
-      const obj = { ...prevObj };
-
-      for (const key of Object.keys(prevObj) as Array<keyof typeof prevObj>) {
-        if (obj[key]) {
-          obj[key] = false;
-        }
-      }
-
-      return {
-        ...obj,
-        [columnKey]: true,
-      };
-    });
-  }
-
-  function createJob(status: ColumnKey, job: Job) {
-    switch (status) {
-      case 'applied':
-        setAppliedJobs((prev) => [...prev, job]);
-        break;
-      case 'interviewing':
-        setInterviewingJobs((prev) => [...prev, job]);
-        break;
-      case 'offered':
-        setOfferedJobs((prev) => [...prev, job]);
-        break;
-      case 'rejected':
-        setRejectedJobs((prev) => [...prev, job]);
-        break;
-      default:
-        break;
-    }
-  }
-
   function moveJob(jobId: string, toColumn: ColumnKey) {
-    const job = jobsById.get(jobId) || cachedJobsById.get(jobId);
+    const job = jobsById.get(jobId);
     if (!job) return;
 
     setAppliedJobs((prev) => prev.filter((job) => String((job as Job)._id ?? '') !== jobId));
@@ -120,16 +63,16 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
 
     switch (toColumn) {
       case 'applied':
-        setAppliedJobs((prev) => [...prev, updatedJob]);
+        setAppliedJobs((prev) => [updatedJob, ...prev]);
         break;
       case 'interviewing':
-        setInterviewingJobs((prev) => [...prev, updatedJob]);
+        setInterviewingJobs((prev) => [updatedJob, ...prev]);
         break;
       case 'offered':
-        setOfferedJobs((prev) => [...prev, updatedJob]);
+        setOfferedJobs((prev) => [updatedJob, ...prev]);
         break;
       case 'rejected':
-        setRejectedJobs((prev) => [...prev, updatedJob]);
+        setRejectedJobs((prev) => [updatedJob, ...prev]);
         break;
     }
     // we can improve performance here by debouncing this call  until the drag and drop have stopped
@@ -149,7 +92,6 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   function handleDrop(e: React.DragEvent, toColumn: ColumnKey) {
     e.preventDefault();
     const jobId = e.dataTransfer.getData('text/plain');
-    console.log('da fuq', jobId);
     if (!jobId) return;
     moveJob(jobId, toColumn);
   }
@@ -161,23 +103,13 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         key={id}
         draggable
         onDragStart={(e) => handleDragStart(e, id)}
-        className="bg-white rounded-md mb-2 shadow cursor-grab gap-4"
+        className="bg-white p-4 rounded-md mb-2 shadow cursor-grab gap-1"
       >
         <CardHeader>
-          <CardAction></CardAction>
           <CardTitle className="font-semibold">{job.jobTitle ?? 'Untitled'}</CardTitle>
           <CardTitle className="text-sm text-muted-foreground">{job.company ?? ''}</CardTitle>
           <CardDescription className="text-xs text-black">{job.notes}</CardDescription>
         </CardHeader>
-        <CardFooter className="flex justify-between items-center">
-          <p className="text-sm font-sans">
-            Applied: {job.appliedAt.getUTCMonth() + 1}/{job.appliedAt.getUTCDate()}/
-            {job.appliedAt.getUTCFullYear()}
-          </p>
-          <Badge variant="default" className="text-sm font-sans font-medium">
-            10 days
-          </Badge>
-        </CardFooter>
       </Card>
     );
   }
@@ -189,9 +121,6 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         name="Applied"
         count={appliedJobs.length}
         columnKey="applied"
-        openCreateForm={openCreateForm.applied}
-        handleCreateForm={handleCreateForm}
-        onJobCreated={createJob}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
@@ -201,9 +130,6 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         name="Interviewing"
         count={interviewingJobs.length}
         columnKey="interviewing"
-        openCreateForm={openCreateForm.interviewing}
-        handleCreateForm={handleCreateForm}
-        onJobCreated={createJob}
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'interviewing')}
       >
@@ -213,9 +139,6 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         name="Offered"
         count={offeredJobs.length}
         columnKey="offered"
-        openCreateForm={openCreateForm.offered}
-        handleCreateForm={handleCreateForm}
-        onJobCreated={createJob}
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'offered')}
       >
@@ -225,9 +148,6 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         name="Rejected"
         count={rejectedJobs.length}
         columnKey="rejected"
-        openCreateForm={openCreateForm.rejected}
-        handleCreateForm={handleCreateForm}
-        onJobCreated={createJob}
         onDragOver={handleDragOver}
         onDrop={(e: React.DragEvent) => handleDrop(e, 'rejected')}
       >

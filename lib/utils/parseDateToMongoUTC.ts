@@ -5,11 +5,3 @@ export function parseDateToMongoUTC(dateStr: string): string {
 
   return utcDate.toISOString().replace('Z', '+00:00');
 }
-
-export function formatMMDDYYYY(value: string): string {
-  return value
-    .replace(/\D/g, '')
-    .replace(/(\d{2})(\d)/, '$1/$2')
-    .replace(/(\d{2})\/(\d{2})(\d)/, '$1/$2/$3')
-    .slice(0, 10);
-}

@@ -1,16 +1,16 @@
-import { useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { ColumnKey } from './JobBoard';
 import { Button } from '../../../components/ui/button';
 import { Plus } from 'lucide-react';
 import CreateJobForm from './CreateJobForm';
 import { Job } from '@/lib/models/jobApplications';
-// import Modal from '../../../components/Modal';
 
 type Props = {
   name: string;
   count: number;
   columnKey: ColumnKey;
+  openCreateForm: boolean;
+  handleCreateForm: (columnKey: ColumnKey) => void;
   onJobCreated: (status: ColumnKey, job: Job) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, toColumn: ColumnKey) => void;
@@ -21,13 +21,13 @@ export function JobColumn({
   name,
   count,
   columnKey,
+  openCreateForm,
+  handleCreateForm,
   onJobCreated,
   onDragOver,
   onDrop,
   children,
 }: Props) {
-  const [open, setOpen] = useState(false);
-
   return (
     <section
       id={name}
@@ -43,21 +43,21 @@ export function JobColumn({
         className={cn(count && 'overflow-auto py-1 px-2 max-h-[calc(100vh-10.5rem)]', 'py-1 px-2')}
       >
         {children}
-        {open && (
+        {openCreateForm && (
           <CreateJobForm
             columnKey={columnKey}
             onJobCreated={onJobCreated}
-            onClose={() => setOpen(false)}
+            onClose={() => handleCreateForm(columnKey)}
           />
         )}
       </div>
-      {!open && (
+      {!openCreateForm && (
         <div className="px-1 w-full items-center">
           <Button
             size="lg"
             variant="ghost"
             className="font-bold flex items-center justify-start w-full cursor-pointer hover:opacity-65 text-slate-700"
-            onClick={() => setOpen(true)}
+            onClick={() => handleCreateForm(columnKey)}
           >
             <Plus />
             Create

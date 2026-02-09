@@ -3,11 +3,10 @@
 import { getUser } from '../auth/getUser';
 import dbConnect from '../db/mongo';
 import JobApplications, { type Job } from '../models/jobApplications';
-// import { notFound } from "next/navigation";
 
-const mockPromise = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-};
+// const mockPromise = async () => {
+//   await new Promise((resolve) => setTimeout(resolve, 2000));
+// };
 
 async function getUserId(): Promise<string> {
   const { id } = await getUser();
@@ -17,21 +16,20 @@ async function getUserId(): Promise<string> {
   return id;
 }
 
-export async function getAllJobApplications(): Promise<Job[] | null> {
+export async function getAllJobApplications(): Promise<Job[]> {
   const userId = await getUserId();
   await dbConnect();
   try {
-    // const jobApplications = await JobApplications.find({ userId }).lean<Job[]>().exec();
     const jobApplications = await JobApplications.find({ userId }).lean<Job[]>().exec();
     const jobs = jobApplications.map((job: Job) => ({
       ...job,
       _id: job._id.toString(),
       userId: job.userId.toString(),
     }));
-    return jobs as Job[] | null;
+    return jobs as Job[];
   } catch (error) {
-    return null;
-    // notFound();
+    console.error(error);
+    return [];
   }
 }
 
@@ -39,8 +37,7 @@ export async function updateJob(_id: string, job: Job): Promise<void> {
   await getUserId();
   await dbConnect();
   try {
-    const res = await JobApplications.updateOne({ _id }, job);
-    console.log(res.acknowledged);
+    await JobApplications.updateOne({ _id }, job);
   } catch (error) {
     console.error(error);
   }
@@ -59,8 +56,6 @@ export async function createJob(
 
   const rawData = Object.fromEntries(formData);
 
-  // console.log({appliedAt, position})
-
   try {
     const jobDoc = await JobApplications.create({ userId, ...rawData });
 
@@ -70,14 +65,13 @@ export async function createJob(
       userId: jobDoc.userId.toString(),
     };
 
-    console.log(job);
     return {
       success: true,
       error: null,
       job,
     };
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     return {
       success: false,
       error: 'Something went wrong',
