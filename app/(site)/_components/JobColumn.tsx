@@ -17,7 +17,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function JobColumn({
+export default function JobColumn({
   name,
   count,
   columnKey,

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
-import { JobColumn } from './JobColumn';
+import JobColumn from './JobColumn';
 import {
   Card,
   CardAction,
