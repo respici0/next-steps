@@ -48,7 +48,7 @@ export default function CreateJobForm({ onClose, onJobCreated, columnKey }: Prop
 
   return (
     <>
-      <Card className="bg-white p-4 rounded-md shadow">
+      <Card className="bg-white rounded-md shadow pb-2.5">
         <form
           action={(formData: FormData) => {
             if (displayDate) {

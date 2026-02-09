@@ -166,25 +166,29 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         key={id}
         draggable
         onDragStart={(e) => handleDragStart(e, id)}
-        className="bg-white rounded-md mb-2 shadow cursor-grab gap-4"
+        className="bg-white rounded-md mb-2 shadow cursor-grab gap-1 font-sans py-4"
       >
         <CardHeader>
-          <CardTitle className="font-semibold">{job.jobTitle ?? 'Untitled'}</CardTitle>
-          <CardTitle className="text-sm text-muted-foreground">{job.company ?? ''}</CardTitle>
+          <CardTitle className="flex flex-col">
+            <span className="font-semibold text-2xl text-shadow-black">
+              {job.jobTitle ?? 'Untitled'}
+            </span>
+            <span className="text-sm font-medium text-muted-foreground">{job.company ?? ''}</span>
+          </CardTitle>
           {job?.jobUrl && (
             <CardDescription>
-              <Button variant="link" className="p-0">
+              <Button variant="link" className="p-0 hover:opacity-60">
                 <a href={job?.jobUrl} target="_blank" rel="noopener noreferrer">
                   Visit Job Posting
                 </a>
               </Button>
             </CardDescription>
           )}
-          <CardDescription className="text-xs text-black">Notes: {job.notes}</CardDescription>
+          <CardDescription className="text-sm">{job.notes}</CardDescription>
         </CardHeader>
-        <CardFooter className="flex justify-between items-center">
-          <p className="text-sm font-sans">Applied: {appliedAt}</p>
-          <Badge variant="default" className="text-sm font-sans font-medium">
+        <CardFooter className="flex justify-between items-center mt-1">
+          <p className="text-sm">Applied: {appliedAt}</p>
+          <Badge variant="default" className="text-sm font-medium">
             {daysSinceUtc(job.appliedAt.toISOString())} days
           </Badge>
         </CardFooter>
