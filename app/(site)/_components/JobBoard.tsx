@@ -64,19 +64,14 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   }, [jobs]);
 
   function handleCreateForm(columnKey: ColumnKey) {
-    setOpenCreateForm((prevObj) => {
-      const obj = { ...prevObj };
+    setOpenCreateForm((prev) => {
+      const next = { ...prev };
 
-      for (const key of Object.keys(prevObj) as Array<keyof typeof prevObj>) {
-        if (obj[key]) {
-          obj[key] = false;
-        }
-      }
+      (Object.keys(prev) as Array<keyof typeof prev>).forEach((key) => {
+        next[key] = key === columnKey;
+      });
 
-      return {
-        ...obj,
-        [columnKey]: true,
-      };
+      return next;
     });
   }
 
