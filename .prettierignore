@@ -42,3 +42,6 @@ public/**/*.ico
 # Misc
 *.lock
 *.pem
+
+# Shadcn/ui components and subfolders
+components/ui/**
