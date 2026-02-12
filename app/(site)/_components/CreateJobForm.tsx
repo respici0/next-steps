@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent, useRef, useState, useEffect } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { createJob } from '@/lib/server-actions/jobApplications';
 import { Button } from '@/components/ui/button';
