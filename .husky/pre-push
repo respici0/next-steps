@@ -1,0 +1,29 @@
+echo "Running pre-push checks: ESLint + Prettier (non-blocking on feature branches)"
+
+# Determine current branch
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+echo "Current branch: $branch"
+
+# Define protected branches where we enforce failures
+PROTECTED='^(main|master|release|prod|staging)$'
+
+run_checks_strict() {
+	echo "Enforcing lint + format checks..."
+	pnpm -s lint
+	pnpm -s format:check
+}
+
+run_checks_warn() {
+	echo "Running lint + format checks (warnings only)..."
+	pnpm -s lint || echo "ESLint found issues (non-blocking)."
+	pnpm -s format:check || echo "Prettier found formatting issues (non-blocking)."
+}
+
+if [ -n "$branch" ] && echo "$branch" | grep -Eq "$PROTECTED"; then
+	run_checks_strict
+else
+	run_checks_warn
+fi
+
+# Do not block push from feature branches — always exit 0
+exit 0

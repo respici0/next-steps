@@ -43,10 +43,7 @@ export async function updateJob(_id: string, job: Job): Promise<void> {
   }
 }
 
-export async function createJob(
-  prevState: unknown,
-  formData: FormData,
-): Promise<{
+export async function createJob(formData: FormData): Promise<{
   success: boolean;
   error: string | null;
   job: Job | null;

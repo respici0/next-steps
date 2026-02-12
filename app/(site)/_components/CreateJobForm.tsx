@@ -1,5 +1,5 @@
 'use client';
-import { FormEvent, useActionState, useEffect, useRef, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { createJob } from '@/lib/server-actions/jobApplications';
 import { Button } from '@/components/ui/button';
@@ -17,17 +17,11 @@ type Props = {
   columnKey: ColumnKey;
 };
 
-export default function CreateJobForm({ onClose, onJobCreated, columnKey }: Props) {
-  const [state, formAction, isPending] = useActionState(createJob, undefined);
+export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
   const [displayDate, setDisplayDate] = useState('');
+  const [isPending, setIsPending] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (state?.success && !isPending && state?.job) {
-      onJobCreated(columnKey, state.job);
-      onClose();
-    }
-  }, [state?.success, isPending, state?.job]);
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   function handleDateChange(e: { target: { value: string } }) {
     let value = e.target.value.replace(/\D/g, '');
@@ -46,19 +40,35 @@ export default function CreateJobForm({ onClose, onJobCreated, columnKey }: Prop
     (e.target as HTMLInputElement).setCustomValidity('Enter a valid date (MM/DD/YYYY)');
   }
 
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    if (displayDate) {
+      const utcDate = parseDateToMongoUTC(displayDate);
+      formData.set('appliedAt', utcDate);
+    }
+    formData.set('status', columnKey);
+
+    setIsPending(true);
+    const result = await createJob(formData);
+
+    if (!result.success) {
+      console.error(result.error);
+      setIsPending(false);
+    }
+
+    if (result.success && result.job) {
+      onJobCreated(columnKey, result.job);
+      formRef?.current?.reset();
+      setIsPending(false);
+    }
+  };
+
   return (
     <>
       <Card className="bg-white rounded-md shadow pb-2.5">
-        <form
-          action={(formData: FormData) => {
-            if (displayDate) {
-              const utcDate = parseDateToMongoUTC(displayDate);
-              formData.set('appliedAt', utcDate);
-            }
-            formData.set('status', columnKey);
-            formAction(formData);
-          }}
-        >
+        <form onSubmit={handleFormSubmit} ref={formRef}>
           <CardContent>
             <FieldGroup className="gap-1">
               <Field className="gap-1">
