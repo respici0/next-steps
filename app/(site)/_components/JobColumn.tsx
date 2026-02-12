@@ -1,0 +1,69 @@
+import { cn } from '@/lib/utils/cn';
+import { ColumnKey } from './JobBoard';
+import { Button } from '../../../components/ui/button';
+import { Plus } from 'lucide-react';
+import CreateJobForm from './CreateJobForm';
+import { Job } from '@/lib/models/jobApplications';
+
+type Props = {
+  name: string;
+  count: number;
+  columnKey: ColumnKey;
+  openCreateForm: boolean;
+  handleCreateForm: (columnKey: ColumnKey) => void;
+  onJobCreated: (status: ColumnKey, job: Job) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent, toColumn: ColumnKey) => void;
+  children: React.ReactNode;
+};
+
+export default function JobColumn({
+  name,
+  count,
+  columnKey,
+  openCreateForm,
+  handleCreateForm,
+  onJobCreated,
+  onDragOver,
+  onDrop,
+  children,
+}: Props) {
+  return (
+    <section
+      id={name}
+      className="bg-white rounded-md border relative pb-2"
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, columnKey)}
+    >
+      <h2 className="font-semibold mb-1 p-2 bg-black text-white rounded-t-md justify-between flex items-center">
+        <span>{name}</span>
+        <span className="text-sm">( {count} )</span>
+      </h2>
+      <div
+        className={cn(count && 'overflow-auto py-1 px-2 max-h-[calc(100vh-10.5rem)]', 'py-1 px-2')}
+      >
+        {children}
+        {openCreateForm && (
+          <CreateJobForm
+            columnKey={columnKey}
+            onJobCreated={onJobCreated}
+            onClose={() => handleCreateForm(columnKey)}
+          />
+        )}
+      </div>
+      {!openCreateForm && (
+        <div className="px-1 w-full items-center">
+          <Button
+            size="lg"
+            variant="ghost"
+            className="font-bold flex items-center justify-start w-full cursor-pointer hover:opacity-65 text-slate-700"
+            onClick={() => handleCreateForm(columnKey)}
+          >
+            <Plus />
+            Create
+          </Button>
+        </div>
+      )}
+    </section>
+  );
+}

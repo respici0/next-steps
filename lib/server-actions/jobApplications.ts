@@ -3,14 +3,20 @@
 import { getUser } from '../auth/getUser';
 import dbConnect from '../db/mongo';
 import JobApplications, { type Job } from '../models/jobApplications';
-// import { notFound } from "next/navigation";
+
+// const mockPromise = async () => {
+//   await new Promise((resolve) => setTimeout(resolve, 2000));
+// };
 
 async function getUserId(): Promise<string> {
   const { id } = await getUser();
+  if (!id) {
+    throw new Error('Unable to authorize user session');
+  }
   return id;
 }
 
-export async function getAllJobApplications(): Promise<Job[] | null> {
+export async function getAllJobApplications(): Promise<Job[]> {
   const userId = await getUserId();
   await dbConnect();
   try {
@@ -20,20 +26,56 @@ export async function getAllJobApplications(): Promise<Job[] | null> {
       _id: job._id.toString(),
       userId: job.userId.toString(),
     }));
-    return jobs as Job[] | null;
+    return jobs as Job[];
   } catch (error) {
-    return null;
-    // notFound();
+    console.error(error);
+    return [];
   }
 }
 
 export async function updateJob(_id: string, job: Job): Promise<void> {
+  await getUserId();
   await dbConnect();
   try {
-    const res = await JobApplications.updateOne({ _id }, job);
-    console.log(res.acknowledged);
+    await JobApplications.updateOne({ _id }, job);
   } catch (error) {
     console.error(error);
+  }
+}
+
+export async function createJob(
+  prevState: unknown,
+  formData: FormData,
+): Promise<{
+  success: boolean;
+  error: string | null;
+  job: Job | null;
+}> {
+  const userId = await getUserId();
+  await dbConnect();
+
+  const rawData = Object.fromEntries(formData);
+  try {
+    const jobDoc = await JobApplications.create({ userId, ...rawData });
+
+    const job: Job = {
+      ...jobDoc.toObject(),
+      _id: jobDoc._id.toString(),
+      userId: jobDoc.userId.toString(),
+    };
+
+    return {
+      success: true,
+      error: null,
+      job,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      error: 'Something went wrong',
+      job: null,
+    };
   }
 }
 

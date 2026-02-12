@@ -1,4 +1,4 @@
-import type mongoose from "mongoose";
+import type mongoose from 'mongoose';
 
 declare global {
   var mongoose: {
