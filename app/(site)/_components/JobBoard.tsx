@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import JobColumn from './JobColumn';
 import { updateJob } from '@/lib/server-actions/jobApplications';
@@ -8,10 +8,18 @@ import { JobCard } from './JobCard';
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
 
 export function JobBoard({ jobs }: { jobs: Job[] }) {
-  const [appliedJobs, setAppliedJobs] = useState<Job[]>([]);
-  const [interviewingJobs, setInterviewingJobs] = useState<Job[]>([]);
-  const [offeredJobs, setOfferedJobs] = useState<Job[]>([]);
-  const [rejectedJobs, setRejectedJobs] = useState<Job[]>([]);
+  const [appliedJobs, setAppliedJobs] = useState<Job[]>(
+    jobs.filter((job) => job.status === 'applied'),
+  );
+  const [interviewingJobs, setInterviewingJobs] = useState<Job[]>(
+    jobs.filter((job) => job.status === 'interviewing'),
+  );
+  const [offeredJobs, setOfferedJobs] = useState<Job[]>(
+    jobs.filter((job) => job.status === 'offered'),
+  );
+  const [rejectedJobs, setRejectedJobs] = useState<Job[]>(
+    jobs.filter((job) => job.status === 'rejected'),
+  );
   const [openCreateForm, setOpenCreateForm] = useState({
     applied: false,
     interviewing: false,
@@ -19,49 +27,12 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     rejected: false,
   });
 
-  const jobsById = useMemo(() => {
-    const map = new Map<string, Job>();
-    for (const job of jobs) map.set(String((job as Job)._id ?? ''), job);
-    return map;
-  }, [jobs]);
-
   const cachedJobsById = useMemo(() => {
     const cachedJobs = [...appliedJobs, ...interviewingJobs, ...offeredJobs, ...rejectedJobs];
     const map = new Map<string, Job>();
     for (const job of cachedJobs) map.set(String((job as Job)._id ?? ''), job);
     return map;
   }, [appliedJobs, interviewingJobs, offeredJobs, rejectedJobs]);
-
-  useEffect(() => {
-    const appliedList: Job[] = [];
-    const interviewingList: Job[] = [];
-    const offeredList: Job[] = [];
-    const rejectedList: Job[] = [];
-
-    for (const job of jobs) {
-      switch (job.status) {
-        case 'applied':
-          appliedList.push(job);
-          break;
-        case 'interviewing':
-          interviewingList.push(job);
-          break;
-        case 'offered':
-          offeredList.push(job);
-          break;
-        case 'rejected':
-          rejectedList.push(job);
-          break;
-        default:
-          break;
-      }
-    }
-
-    setAppliedJobs(appliedList);
-    setInterviewingJobs(interviewingList);
-    setOfferedJobs(offeredList);
-    setRejectedJobs(rejectedList);
-  }, [jobs]);
 
   function handleCreateForm(columnKey: ColumnKey) {
     setOpenCreateForm((prevObj) => {
@@ -100,7 +71,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   }
 
   function moveJob(jobId: string, toColumn: ColumnKey) {
-    const job = jobsById.get(jobId) || cachedJobsById.get(jobId);
+    const job = cachedJobsById.get(jobId);
     if (!job) return;
 
     setAppliedJobs((prev) => prev.filter((job) => String((job as Job)._id ?? '') !== jobId));
