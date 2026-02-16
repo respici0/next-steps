@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils/cn';
 import { ColumnKey } from './JobBoard';
 import { Button } from '../../../components/ui/button';
 import { Plus } from 'lucide-react';
-import CreateJobForm from './CreateJobForm';
+import JobForm from './JobForm';
 import { Job } from '@/lib/models/jobApplications';
 
 type Props = {
@@ -44,11 +44,7 @@ export default function JobColumn({
       >
         {children}
         {openCreateForm && (
-          <CreateJobForm
-            columnKey={columnKey}
-            onJobCreated={onJobCreated}
-            onClose={() => handleCreateForm(columnKey)}
-          />
+          <JobForm columnKey={columnKey} onJobCreated={onJobCreated} action="create" />
         )}
       </div>
       {!openCreateForm && (

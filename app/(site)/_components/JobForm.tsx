@@ -10,14 +10,17 @@ import { parseDateToMongoUTC } from '@/lib/utils/parseDateToMongoUTC';
 import { Spinner } from '@/components/ui/spinner';
 import { ColumnKey } from './JobBoard';
 import { type Job } from '@/lib/models/jobApplications';
+import { cn } from '@/lib/utils/cn';
 
 type Props = {
-  onClose: () => void;
-  onJobCreated: (status: ColumnKey, job: Job) => void;
+  onClose?: () => void;
+  onJobCreated?: (status: ColumnKey, job: Job) => void;
   columnKey: ColumnKey;
+  action: 'create' | 'update';
+  job?: Job;
 };
 
-export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
+export default function JobForm({ onJobCreated, columnKey, action, onClose }: Props) {
   const [displayDate, setDisplayDate] = useState('');
   const [isPending, setIsPending] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -43,31 +46,33 @@ export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-    if (displayDate) {
-      const utcDate = parseDateToMongoUTC(displayDate);
-      formData.set('appliedAt', utcDate);
-    }
-    formData.set('status', columnKey);
+    if (action === 'create') {
+      const formData = new FormData(e.currentTarget);
+      if (displayDate) {
+        const utcDate = parseDateToMongoUTC(displayDate);
+        formData.set('appliedAt', utcDate);
+      }
+      formData.set('status', columnKey);
 
-    setIsPending(true);
-    const result = await createJob(formData);
+      setIsPending(true);
+      const result = await createJob(formData);
 
-    if (!result.success) {
-      console.error(result.error);
-      setIsPending(false);
-    }
+      if (!result.success) {
+        console.error(result.error);
+        setIsPending(false);
+      }
 
-    if (result.success && result.job) {
-      onJobCreated(columnKey, result.job);
-      formRef?.current?.reset();
-      setIsPending(false);
+      if (result.success && result.job && onJobCreated) {
+        onJobCreated(columnKey, result.job);
+        formRef?.current?.reset();
+        setIsPending(false);
+      }
     }
   };
 
   return (
     <>
-      <Card className="bg-white rounded-md shadow pb-2.5">
+      <Card className="bg-white rounded-md shadow pb-2.5 mb-2">
         <form onSubmit={handleFormSubmit} ref={formRef}>
           <CardContent>
             <FieldGroup className="gap-1">
@@ -139,7 +144,14 @@ export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
               </Field>
             </FieldGroup>
           </CardContent>
-          <CardFooter className="flex justify-end mt-4">
+          <CardFooter
+            className={cn('flex justify-end mt-4', action === 'update' && 'justify-between')}
+          >
+            {action === 'update' && (
+              <Button type="button" variant="outline" className="cursor-pointer" onClick={onClose}>
+                Cancel
+              </Button>
+            )}
             <Button type="submit" className="cursor-pointer" disabled={isPending}>
               {isPending ? <Spinner /> : <CornerDownLeft />}
             </Button>

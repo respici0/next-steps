@@ -134,6 +134,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
             key={String((job as Job)._id ?? '')}
             job={job}
             handleDragStart={handleDragStart}
+            columnKey="applied"
           />
         ))}
       </JobColumn>
@@ -152,6 +153,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
             key={String((job as Job)._id ?? '')}
             job={job}
             handleDragStart={handleDragStart}
+            columnKey="interviewing"
           />
         ))}
       </JobColumn>
@@ -170,6 +172,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
             key={String((job as Job)._id ?? '')}
             job={job}
             handleDragStart={handleDragStart}
+            columnKey="offered"
           />
         ))}
       </JobColumn>
@@ -188,6 +191,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
             key={String((job as Job)._id ?? '')}
             job={job}
             handleDragStart={handleDragStart}
+            columnKey="rejected"
           />
         ))}
       </JobColumn>
