@@ -33,11 +33,21 @@ export async function getAllJobApplications(): Promise<Job[]> {
   }
 }
 
-export async function updateJob(_id: string, job: Job): Promise<void> {
-  await getUserId();
+export async function updateJob(
+  _id: string,
+  formData: FormData,
+): Promise<{
+  success: boolean;
+  error: string | null;
+  job: Job | null;
+}> {
+  const userId = await getUserId();
   await dbConnect();
+
+  const rawData = Object.fromEntries(formData);
   try {
-    await JobApplications.updateOne({ _id }, job);
+    const jobDoc = await JobApplications.findOneAndUpdate({ _id, userId }, { ...rawData });
+    console.log(jobDoc);
   } catch (error) {
     console.error(error);
   }

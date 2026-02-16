@@ -1,7 +1,7 @@
 'use client';
 import { FormEvent, useRef, useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { createJob } from '@/lib/server-actions/jobApplications';
+import { createJob, updateJob } from '@/lib/server-actions/jobApplications';
 import { Button } from '@/components/ui/button';
 import { CornerDownLeft } from 'lucide-react';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -73,15 +73,21 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
       }
     }
 
+    // update form method here, -we don't reset form since it's not a create
     if (action === 'update') {
       const formData = new FormData(e.currentTarget);
-       if (displayDate) {
+      if (displayDate) {
         const utcDate = parseDateToMongoUTC(displayDate);
         formData.set('appliedAt', utcDate);
       }
       formData.set('status', columnKey);
 
+      console.log(job, 'formData', formData);
+
       setIsPending(true);
+      if (job?._id) {
+        await updateJob(job?._id, formData);
+      }
     }
   };
 
@@ -167,7 +173,13 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
             className={cn('flex justify-end mt-4', action === 'update' && 'justify-between')}
           >
             {action === 'update' && (
-              <Button type="button" variant="outline" className="cursor-pointer" onClick={onClose} disabled={isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                className="cursor-pointer"
+                onClick={onClose}
+                disabled={isPending}
+              >
                 Cancel
               </Button>
             )}
