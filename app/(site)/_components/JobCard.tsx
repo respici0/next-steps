@@ -18,8 +18,7 @@ type Props = {
 
 export function JobCard({ job, handleDragStart }: Props) {
   const id = String((job as Job)._id ?? '');
-  const appliedAt = `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/
-            ${job.appliedAt.getUTCFullYear()}`;
+  const appliedAt = `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`;
 
   return (
     <Card

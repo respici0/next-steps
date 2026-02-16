@@ -1,2 +1,0 @@
-# Format staged files
-pnpm lint-staged
