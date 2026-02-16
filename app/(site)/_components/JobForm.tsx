@@ -20,14 +20,15 @@ type Props = {
   job?: Job;
 };
 
-export default function JobForm({ onJobCreated, columnKey, action, onClose }: Props) {
-  const [displayDate, setDisplayDate] = useState('');
+export default function JobForm({ onJobCreated, columnKey, action, job, onClose }: Props) {
+  const [displayDate, setDisplayDate] = useState(job?.appliedAt ? `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}` : '');
   const [isPending, setIsPending] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
 
   function handleDateChange(e: { target: { value: string } }) {
     let value = e.target.value.replace(/\D/g, '');
+    console.log('before', value)
 
     if (value.length >= 5) {
       value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4, 8)}`;
@@ -35,6 +36,7 @@ export default function JobForm({ onJobCreated, columnKey, action, onClose }: Pr
       value = `${value.slice(0, 2)}/${value.slice(2)}`;
     }
 
+    console.log('value', value);
     setDisplayDate(value);
     inputRef.current?.setCustomValidity('');
   }
@@ -73,7 +75,7 @@ export default function JobForm({ onJobCreated, columnKey, action, onClose }: Pr
   return (
     <>
       <Card className="bg-white rounded-md shadow pb-2.5 mb-2">
-        <form onSubmit={handleFormSubmit} ref={formRef}>
+        <form key={job?._id || 'create' } onSubmit={handleFormSubmit} ref={formRef}>
           <CardContent>
             <FieldGroup className="gap-1">
               <Field className="gap-1">
@@ -85,6 +87,7 @@ export default function JobForm({ onJobCreated, columnKey, action, onClose }: Pr
                   type="text"
                   name="jobTitle"
                   placeholder="Job title (e.g., Software Engineer)"
+                  defaultValue={job?.jobTitle ?? ''}
                   required
                 />
               </Field>
@@ -97,6 +100,7 @@ export default function JobForm({ onJobCreated, columnKey, action, onClose }: Pr
                   type="text"
                   name="company"
                   placeholder="Company name (e.g., Acme Corp)"
+                  defaultValue={job?.company ?? ''}
                   required
                 />
               </Field>
@@ -110,6 +114,7 @@ export default function JobForm({ onJobCreated, columnKey, action, onClose }: Pr
                   type="text"
                   name="jobUrl"
                   placeholder="Job link (e.g., https://example.com)"
+                  defaultValue={job?.jobUrl ?? ''}
                 />
               </Field>
               <Field className="gap-1">
@@ -121,6 +126,7 @@ export default function JobForm({ onJobCreated, columnKey, action, onClose }: Pr
                   type="text"
                   name="notes"
                   placeholder="Notes (e.g., concerns, next steps, reminders)"
+                  defaultValue={job?.notes ?? ''} 
                 />
               </Field>
               <Field className="gap-1">

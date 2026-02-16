@@ -28,10 +28,6 @@ export function JobCard({ job, handleDragStart, columnKey }: Props) {
   const id = String((job as Job)._id ?? '');
   const appliedAt = `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`;
 
-  function handleUpdateForm() {
-    setOpenUpdateForm((prev) => !prev);
-  }
-
   return (
     <>
       {!openUpdateForm ? (
@@ -58,7 +54,7 @@ export function JobCard({ job, handleDragStart, columnKey }: Props) {
               </CardDescription>
             )}
             <CardAction>
-              <Button variant="ghost" onClick={handleUpdateForm}>
+              <Button variant="ghost" onClick={() => setOpenUpdateForm(prev => !prev)}>
                 <SquarePen />
               </Button>
             </CardAction>
@@ -74,7 +70,7 @@ export function JobCard({ job, handleDragStart, columnKey }: Props) {
           </CardFooter>
         </Card>
       ) : (
-        <JobForm columnKey={columnKey} action="update" onClose={handleUpdateForm} />
+        <JobForm columnKey={columnKey} action="update" onClose={() => setOpenUpdateForm(prev => !prev)} job={job}/>
       )}
     </>
   );
