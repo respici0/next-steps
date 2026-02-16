@@ -23,7 +23,7 @@ type Props = {
 export default function JobForm({ onJobCreated, columnKey, action, job, onClose }: Props) {
   const [displayDate, setDisplayDate] = useState(
     job?.appliedAt
-      ? `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`
+      ? `${(job.appliedAt.getUTCMonth() + 1).toString().padStart(2, '0')}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`
       : '',
   );
   const [isPending, setIsPending] = useState(false);
@@ -32,7 +32,6 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
 
   function handleDateChange(e: { target: { value: string } }) {
     let value = e.target.value.replace(/\D/g, '');
-    console.log('before', value);
 
     if (value.length >= 5) {
       value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4, 8)}`;
@@ -40,7 +39,6 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
       value = `${value.slice(0, 2)}/${value.slice(2)}`;
     }
 
-    console.log('value', value);
     setDisplayDate(value);
     inputRef.current?.setCustomValidity('');
   }
@@ -73,6 +71,17 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
         formRef?.current?.reset();
         setIsPending(false);
       }
+    }
+
+    if (action === 'update') {
+      const formData = new FormData(e.currentTarget);
+       if (displayDate) {
+        const utcDate = parseDateToMongoUTC(displayDate);
+        formData.set('appliedAt', utcDate);
+      }
+      formData.set('status', columnKey);
+
+      setIsPending(true);
     }
   };
 
@@ -158,7 +167,7 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
             className={cn('flex justify-end mt-4', action === 'update' && 'justify-between')}
           >
             {action === 'update' && (
-              <Button type="button" variant="outline" className="cursor-pointer" onClick={onClose}>
+              <Button type="button" variant="outline" className="cursor-pointer" onClick={onClose} disabled={isPending}>
                 Cancel
               </Button>
             )}
