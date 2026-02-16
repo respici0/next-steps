@@ -21,14 +21,18 @@ type Props = {
 };
 
 export default function JobForm({ onJobCreated, columnKey, action, job, onClose }: Props) {
-  const [displayDate, setDisplayDate] = useState(job?.appliedAt ? `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}` : '');
+  const [displayDate, setDisplayDate] = useState(
+    job?.appliedAt
+      ? `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`
+      : '',
+  );
   const [isPending, setIsPending] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
 
   function handleDateChange(e: { target: { value: string } }) {
     let value = e.target.value.replace(/\D/g, '');
-    console.log('before', value)
+    console.log('before', value);
 
     if (value.length >= 5) {
       value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4, 8)}`;
@@ -75,7 +79,7 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
   return (
     <>
       <Card className="bg-white rounded-md shadow pb-2.5 mb-2">
-        <form key={job?._id || 'create' } onSubmit={handleFormSubmit} ref={formRef}>
+        <form key={job?._id || 'create'} onSubmit={handleFormSubmit} ref={formRef}>
           <CardContent>
             <FieldGroup className="gap-1">
               <Field className="gap-1">
@@ -126,7 +130,7 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
                   type="text"
                   name="notes"
                   placeholder="Notes (e.g., concerns, next steps, reminders)"
-                  defaultValue={job?.notes ?? ''} 
+                  defaultValue={job?.notes ?? ''}
                 />
               </Field>
               <Field className="gap-1">

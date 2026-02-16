@@ -54,7 +54,7 @@ export function JobCard({ job, handleDragStart, columnKey }: Props) {
               </CardDescription>
             )}
             <CardAction>
-              <Button variant="ghost" onClick={() => setOpenUpdateForm(prev => !prev)}>
+              <Button variant="ghost" onClick={() => setOpenUpdateForm((prev) => !prev)}>
                 <SquarePen />
               </Button>
             </CardAction>
@@ -70,7 +70,12 @@ export function JobCard({ job, handleDragStart, columnKey }: Props) {
           </CardFooter>
         </Card>
       ) : (
-        <JobForm columnKey={columnKey} action="update" onClose={() => setOpenUpdateForm(prev => !prev)} job={job}/>
+        <JobForm
+          columnKey={columnKey}
+          action="update"
+          onClose={() => setOpenUpdateForm((prev) => !prev)}
+          job={job}
+        />
       )}
     </>
   );
