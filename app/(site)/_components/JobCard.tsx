@@ -19,11 +19,12 @@ import { type ColumnKey } from './JobBoard';
 
 type Props = {
   job: Job;
+  onJobUpdated: (status: ColumnKey, job: Job) => void;
   handleDragStart: (e: React.DragEvent, id: string) => void;
   columnKey: ColumnKey;
 };
 
-export function JobCard({ job, handleDragStart, columnKey }: Props) {
+export function JobCard({ job, handleDragStart, onJobUpdated, columnKey }: Props) {
   const [openUpdateForm, setOpenUpdateForm] = useState(false);
   const id = String((job as Job)._id ?? '');
   const appliedAt = `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`;
@@ -73,6 +74,7 @@ export function JobCard({ job, handleDragStart, columnKey }: Props) {
         <JobForm
           columnKey={columnKey}
           action="update"
+          onJobUpdated={onJobUpdated}
           onClose={() => setOpenUpdateForm((prev) => !prev)}
           job={job}
         />

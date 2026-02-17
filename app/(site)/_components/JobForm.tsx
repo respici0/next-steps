@@ -15,12 +15,20 @@ import { cn } from '@/lib/utils/cn';
 type Props = {
   onClose?: () => void;
   onJobCreated?: (status: ColumnKey, job: Job) => void;
+  onJobUpdated?: (status: ColumnKey, job: Job) => void;
   columnKey: ColumnKey;
   action: 'create' | 'update';
   job?: Job;
 };
 
-export default function JobForm({ onJobCreated, columnKey, action, job, onClose }: Props) {
+export default function JobForm({
+  onJobCreated,
+  onJobUpdated,
+  columnKey,
+  action,
+  job,
+  onClose,
+}: Props) {
   const [displayDate, setDisplayDate] = useState(
     job?.appliedAt
       ? `${(job.appliedAt.getUTCMonth() + 1).toString().padStart(2, '0')}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`
@@ -66,9 +74,8 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
         setIsPending(false);
       }
 
-      if (result.success && result.job && onJobCreated) {
-        onJobCreated(columnKey, result.job);
-        formRef?.current?.reset();
+      if (result.success && result.job) {
+        onJobCreated?.(columnKey, result.job);
         setIsPending(false);
       }
     }
@@ -82,11 +89,20 @@ export default function JobForm({ onJobCreated, columnKey, action, job, onClose 
       }
       formData.set('status', columnKey);
 
-      console.log(job, 'formData', formData);
-
       setIsPending(true);
       if (job?._id) {
-        await updateJob(job?._id, formData);
+        const result = await updateJob(job?._id, formData);
+
+        if (!result.success) {
+          console.error(result.error);
+          setIsPending(false);
+        }
+
+        if (result.success && result.job) {
+          onJobUpdated?.(columnKey, result.job);
+          setIsPending(false);
+          onClose?.();
+        }
       }
     }
   };

@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import JobColumn from './JobColumn';
-import { updateJob } from '@/lib/server-actions/jobApplications';
+import { updateJobStatus } from '@/lib/server-actions/jobApplications';
 import { JobCard } from './JobCard';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
@@ -70,6 +70,35 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     }
   }
 
+  function replaceJob(jobs: Job[], updatedJob: Job): Job[] {
+    return jobs.map((job: Job) =>
+      String(job._id) === String(updatedJob._id)
+        ? {
+            ...updatedJob,
+          }
+        : job,
+    );
+  }
+
+  function updateJob(status: ColumnKey, job: Job) {
+    switch (status) {
+      case 'applied':
+        setAppliedJobs((prev) => replaceJob(prev, job));
+        break;
+      case 'interviewing':
+        setInterviewingJobs((prev) => replaceJob(prev, job));
+        break;
+      case 'offered':
+        setOfferedJobs((prev) => replaceJob(prev, job));
+        break;
+      case 'rejected':
+        setRejectedJobs((prev) => replaceJob(prev, job));
+        break;
+      default:
+        break;
+    }
+  }
+
   function moveJob(jobId: string, toColumn: ColumnKey) {
     const job = cachedJobsById.get(jobId);
     if (!job) return;
@@ -96,7 +125,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         break;
     }
     // we can improve performance here by debouncing this call  until the drag and drop have stopped
-    updateJob(job._id, updatedJob);
+    updateJobStatus(job._id, updatedJob);
   }
 
   function handleDragStart(e: React.DragEvent, jobId: string) {
@@ -133,6 +162,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
           <JobCard
             key={String((job as Job)._id ?? '')}
             job={job}
+            onJobUpdated={updateJob}
             handleDragStart={handleDragStart}
             columnKey="applied"
           />
@@ -151,6 +181,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         {interviewingJobs.map((job) => (
           <JobCard
             key={String((job as Job)._id ?? '')}
+            onJobUpdated={updateJob}
             job={job}
             handleDragStart={handleDragStart}
             columnKey="interviewing"
@@ -170,6 +201,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         {offeredJobs.map((job) => (
           <JobCard
             key={String((job as Job)._id ?? '')}
+            onJobUpdated={updateJob}
             job={job}
             handleDragStart={handleDragStart}
             columnKey="offered"
@@ -189,6 +221,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         {rejectedJobs.map((job) => (
           <JobCard
             key={String((job as Job)._id ?? '')}
+            onJobUpdated={updateJob}
             job={job}
             handleDragStart={handleDragStart}
             columnKey="rejected"
