@@ -45,14 +45,12 @@ export async function updateJob(
   await dbConnect();
 
   const rawData = Object.fromEntries(formData);
-  console.log('update job', rawData);
   try {
     const jobDoc = await JobApplications.findOneAndUpdate(
       { _id, userId },
       { ...rawData },
       { new: true },
     );
-    console.log('JOB DOC', jobDoc);
     if (!jobDoc) {
       throw new Error('Unable to update job');
     }
