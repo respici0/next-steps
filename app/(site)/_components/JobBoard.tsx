@@ -12,6 +12,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
+import { Spinner } from '@/components/ui/spinner';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
 
@@ -45,7 +46,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
 
   const { width } = useWindowSize();
 
-  const renderMobileBoard = width <= 768;
+  const renderMobileBoard = width <= 768 && width !== 0;
 
   const columnConfigs: ColumnConfig[] = [
     {
@@ -95,6 +96,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   }
 
   function createJob(status: ColumnKey, job: Job) {
+    console.log(status, job);
     switch (status) {
       case 'applied':
         setAppliedJobs((prev) => [...prev, job]);
@@ -172,6 +174,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   if (renderMobileBoard) {
     return (
       <div className="flex flex-col gap-4">
+        <h1 className="sr-only">Job Application Board</h1>
         <Tabs defaultValue="applied" value={activeMobileColumn} onValueChange={scrollToColumn}>
           <TabsList>
             {columnConfigs.map(({ name, columnKey }) => (
@@ -189,7 +192,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
                   name={name}
                   count={jobs.length}
                   columnKey={columnKey}
-                  openCreateForm={openCreateForm.applied}
+                  openCreateForm={openCreateForm[columnKey]}
                   handleCreateForm={handleCreateForm}
                   onJobCreated={createJob}
                   onDragOver={handleDragOver}
@@ -219,7 +222,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
             name={name}
             count={jobs.length}
             columnKey={columnKey}
-            openCreateForm={openCreateForm.applied}
+            openCreateForm={openCreateForm[columnKey]}
             handleCreateForm={handleCreateForm}
             onJobCreated={createJob}
             onDragOver={handleDragOver}
