@@ -12,7 +12,6 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
-import { Spinner } from '@/components/ui/spinner';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
 
