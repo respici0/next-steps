@@ -47,24 +47,26 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   }
 
   function updateJob(status: ColumnKey, job: Job) {
-    setJobsByStatus(prev => {
+    setJobsByStatus((prev) => {
       return {
         ...prev,
-      [status]: replaceJob(prev[status], job) 
-      }
-    })
+        [status]: replaceJob(prev[status], job),
+      };
+    });
   }
 
   function removeJobFromColumn(jobId: string) {
-    setJobsByStatus(prev => {
-     const obj = {} as typeof prev;
+    setJobsByStatus((prev) => {
+      const obj = {} as typeof prev;
 
       for (const status of Object.keys(prev)) {
-         obj[status as ColumnKey] = prev[status as ColumnKey].filter((job) => String((job as Job)._id ?? '') !== jobId);
+        obj[status as ColumnKey] = prev[status as ColumnKey].filter(
+          (job) => String((job as Job)._id ?? '') !== jobId,
+        );
       }
-      
+
       return obj;
-    })
+    });
   }
 
   function moveJob(jobId: string, toColumn: ColumnKey) {
@@ -72,9 +74,9 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     const addJobToColumn = createJob;
     if (!job) return;
 
-    removeJobFromColumn(jobId)
+    removeJobFromColumn(jobId);
     const updatedJob = { ...job, status: toColumn } as Job;
-    addJobToColumn(toColumn, updatedJob) 
+    addJobToColumn(toColumn, updatedJob);
     // we can improve performance here by debouncing this call  until the drag and drop have stopped
     updateJobStatus(job._id, updatedJob);
   }
