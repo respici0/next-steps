@@ -4,8 +4,22 @@ import { type Job } from '@/lib/models/jobApplications';
 import JobColumn from './JobColumn';
 import { updateJob } from '@/lib/server-actions/jobApplications';
 import { JobCard } from './JobCard';
+import { useWindowSize } from '@/lib/hooks';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from '@/components/ui/carousel';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
+
+export interface ColumnConfig {
+  name: string;
+  jobs: Job[];
+  columnKey: ColumnKey;
+}
 
 export function JobBoard({ jobs }: { jobs: Job[] }) {
   const [appliedJobs, setAppliedJobs] = useState<Job[]>(
@@ -26,6 +40,35 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     offered: false,
     rejected: false,
   });
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [activeMobileColumn, setActiveMobileColumn] = useState<string>('applied');
+
+  const { width } = useWindowSize();
+
+  const renderMobileBoard = width <= 768;
+
+  const columnConfigs: ColumnConfig[] = [
+    {
+      name: 'Applied',
+      jobs: appliedJobs,
+      columnKey: 'applied',
+    },
+    {
+      name: 'Interviewing',
+      jobs: interviewingJobs,
+      columnKey: 'interviewing',
+    },
+    {
+      name: 'Offered',
+      jobs: offeredJobs,
+      columnKey: 'offered',
+    },
+    {
+      name: 'Rejected',
+      jobs: rejectedJobs,
+      columnKey: 'rejected',
+    },
+  ];
 
   const cachedJobsById = useMemo(() => {
     const cachedJobs = [...appliedJobs, ...interviewingJobs, ...offeredJobs, ...rejectedJobs];
@@ -116,81 +159,82 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     moveJob(jobId, toColumn);
   }
 
-  return (
-    <div className="md:grid md:grid-cols-4 gap-2">
-      <h1 className="sr-only">Job Application Board</h1>
-      <JobColumn
-        name="Applied"
-        count={appliedJobs.length}
-        columnKey="applied"
-        openCreateForm={openCreateForm.applied}
-        handleCreateForm={handleCreateForm}
-        onJobCreated={createJob}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
-        {appliedJobs.map((job) => (
-          <JobCard
-            key={String((job as Job)._id ?? '')}
-            job={job}
-            handleDragStart={handleDragStart}
-          />
+  function scrollToColumn(columnKey: string) {
+    setActiveMobileColumn(columnKey);
+
+    carouselApi?.scrollTo(columnConfigs.findIndex((config) => config.columnKey === columnKey));
+  }
+
+  carouselApi?.on('select', () => {
+    setActiveMobileColumn(columnConfigs[carouselApi.selectedScrollSnap()].columnKey);
+  });
+
+  if (renderMobileBoard) {
+    return (
+      <div className="flex flex-col gap-4">
+        <Tabs defaultValue="applied" value={activeMobileColumn} onValueChange={scrollToColumn}>
+          <TabsList>
+            {columnConfigs.map(({ name, columnKey }) => (
+              <TabsTrigger key={`tab-trigger-${columnKey}`} value={columnKey}>
+                {name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+        <Carousel setApi={setCarouselApi}>
+          <CarouselContent>
+            {columnConfigs.map(({ name, jobs, columnKey }) => (
+              <CarouselItem key={columnKey} id={columnKey}>
+                <JobColumn
+                  name={name}
+                  count={jobs.length}
+                  columnKey={columnKey}
+                  openCreateForm={openCreateForm.applied}
+                  handleCreateForm={handleCreateForm}
+                  onJobCreated={createJob}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
+                  {jobs.map((job) => (
+                    <JobCard
+                      key={String((job as Job)._id ?? '')}
+                      job={job}
+                      handleDragStart={handleDragStart}
+                    />
+                  ))}
+                </JobColumn>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+    );
+  } else {
+    return (
+      <div className="md:grid md:grid-cols-4 gap-2 h-full">
+        <h1 className="sr-only">Job Application Board</h1>
+        {columnConfigs.map(({ name, jobs, columnKey }) => (
+          <JobColumn
+            key={columnKey}
+            name={name}
+            count={jobs.length}
+            columnKey={columnKey}
+            openCreateForm={openCreateForm.applied}
+            handleCreateForm={handleCreateForm}
+            onJobCreated={createJob}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            {jobs.map((job) => (
+              <JobCard
+                key={String((job as Job)._id ?? '')}
+                job={job}
+                handleDragStart={handleDragStart}
+              />
+            ))}
+          </JobColumn>
         ))}
-      </JobColumn>
-      <JobColumn
-        name="Interviewing"
-        count={interviewingJobs.length}
-        columnKey="interviewing"
-        openCreateForm={openCreateForm.interviewing}
-        handleCreateForm={handleCreateForm}
-        onJobCreated={createJob}
-        onDragOver={handleDragOver}
-        onDrop={(e: React.DragEvent) => handleDrop(e, 'interviewing')}
-      >
-        {interviewingJobs.map((job) => (
-          <JobCard
-            key={String((job as Job)._id ?? '')}
-            job={job}
-            handleDragStart={handleDragStart}
-          />
-        ))}
-      </JobColumn>
-      <JobColumn
-        name="Offered"
-        count={offeredJobs.length}
-        columnKey="offered"
-        openCreateForm={openCreateForm.offered}
-        handleCreateForm={handleCreateForm}
-        onJobCreated={createJob}
-        onDragOver={handleDragOver}
-        onDrop={(e: React.DragEvent) => handleDrop(e, 'offered')}
-      >
-        {offeredJobs.map((job) => (
-          <JobCard
-            key={String((job as Job)._id ?? '')}
-            job={job}
-            handleDragStart={handleDragStart}
-          />
-        ))}
-      </JobColumn>
-      <JobColumn
-        name="Rejected"
-        count={rejectedJobs.length}
-        columnKey="rejected"
-        openCreateForm={openCreateForm.rejected}
-        handleCreateForm={handleCreateForm}
-        onJobCreated={createJob}
-        onDragOver={handleDragOver}
-        onDrop={(e: React.DragEvent) => handleDrop(e, 'rejected')}
-      >
-        {rejectedJobs.map((job) => (
-          <JobCard
-            key={String((job as Job)._id ?? '')}
-            job={job}
-            handleDragStart={handleDragStart}
-          />
-        ))}
-      </JobColumn>
-    </div>
-  );
+      </div>
+    );
+  }
 }
