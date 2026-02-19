@@ -76,6 +76,7 @@ export default function JobForm({
 
       if (result.success && result.job) {
         onJobCreated?.(columnKey, result.job);
+        formRef.current?.reset();
         setIsPending(false);
       }
     }
