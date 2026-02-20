@@ -55,63 +55,44 @@ export default function JobForm({
     (e.target as HTMLInputElement).setCustomValidity('Enter a valid date (MM/DD/YYYY)');
   }
 
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-
-    if (action === 'create') {
-      const formData = new FormData(e.currentTarget);
+  async function handleFormAction(formData: FormData): Promise<void> {
+    setIsPending(true);
+    try {
       if (displayDate) {
-        const utcDate = parseDateToMongoUTC(displayDate);
-        formData.set('appliedAt', utcDate);
+        formData.set('appliedAt', parseDateToMongoUTC(displayDate));
       }
       formData.set('status', columnKey);
 
-      setIsPending(true);
-      const result = await createJob(formData);
-
-      if (!result.success) {
-        console.error(result.error);
-        setIsPending(false);
-      }
-
-      if (result.success && result.job) {
+      if (action === 'create') {
+        const result = await createJob(formData);
+        if (!result.success || !result.job) {
+          console.error(result.error);
+          return;
+        }
         onJobCreated?.(columnKey, result.job);
         formRef.current?.reset();
-        setIsPending(false);
+        setDisplayDate('');
+        return;
       }
-    }
 
-    // update form method here, -we don't reset form since it's not a create
-    if (action === 'update') {
-      const formData = new FormData(e.currentTarget);
-      if (displayDate) {
-        const utcDate = parseDateToMongoUTC(displayDate);
-        formData.set('appliedAt', utcDate);
-      }
-      formData.set('status', columnKey);
-
-      setIsPending(true);
-      if (job?._id) {
-        const result = await updateJob(job?._id, formData);
-
-        if (!result.success) {
+      if (action === 'update' && job?._id) {
+        const result = await updateJob(job._id, formData);
+        if (!result.success || !result.job) {
           console.error(result.error);
-          setIsPending(false);
+          return;
         }
-
-        if (result.success && result.job) {
-          onJobUpdated?.(columnKey, result.job);
-          setIsPending(false);
-          onClose?.();
-        }
+        onJobUpdated?.(columnKey, result.job);
+        onClose?.();
       }
+    } finally {
+      setIsPending(false);
     }
-  };
+  }
 
   return (
     <>
       <Card className="bg-white rounded-md shadow pb-2.5 mb-2">
-        <form key={job?._id || 'create'} onSubmit={handleFormSubmit} ref={formRef}>
+        <form key={job?._id || 'create'} action={handleFormAction} ref={formRef}>
           <CardContent>
             <FieldGroup className="gap-1">
               <Field className="gap-1">
