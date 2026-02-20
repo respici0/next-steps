@@ -33,13 +33,46 @@ export async function getAllJobApplications(): Promise<Job[]> {
   }
 }
 
-export async function updateJob(_id: string, job: Job): Promise<void> {
-  await getUserId();
+export async function updateJob(
+  _id: string,
+  formData: FormData,
+): Promise<{
+  success: boolean;
+  error: string | null;
+  job: Job | null;
+}> {
+  const userId = await getUserId();
   await dbConnect();
+
+  const rawData = Object.fromEntries(formData);
   try {
-    await JobApplications.updateOne({ _id }, job);
+    const jobDoc = await JobApplications.findOneAndUpdate(
+      { _id, userId },
+      { ...rawData },
+      { new: true },
+    );
+    if (!jobDoc) {
+      throw new Error('Unable to update job');
+    }
+
+    const job: Job = {
+      ...jobDoc.toObject(),
+      _id: jobDoc._id.toString(),
+      userId: jobDoc.userId.toString(),
+    };
+
+    return {
+      success: true,
+      error: null,
+      job,
+    };
   } catch (error) {
-    console.error(error);
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      success: false,
+      error: message || 'Unable to update job.',
+      job: null,
+    };
   }
 }
 
@@ -73,6 +106,16 @@ export async function createJob(formData: FormData): Promise<{
       error: 'Something went wrong',
       job: null,
     };
+  }
+}
+
+export async function updateJobStatus(_id: string, job: Job) {
+  try {
+    const userId = await getUserId();
+    await dbConnect();
+    await JobApplications.updateOne({ _id, userId }, job);
+  } catch (error) {
+    console.error(error);
   }
 }
 
