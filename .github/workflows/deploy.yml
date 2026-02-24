@@ -1,0 +1,84 @@
+name: 🚀 Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment to deploy to (Preview/Production)'
+        required: true
+        type: string
+      production:
+        description: 'Deploy to production'
+        required: false
+        default: false
+        type: boolean
+    outputs:
+      deployment-url:
+        description: 'Deployment URL'
+        value: ${{ jobs.deploy.outputs.deployment-url }}
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.set-url.outputs.deployment-url }}
+    outputs:
+      deployment-url: ${{ steps.set-url.outputs.deployment-url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Pull Vercel project settings
+        run: pnpm dlx vercel pull --yes --environment=${{ inputs.production && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          BETTER_AUTH_BASE_URL: ${{ vars.BETTER_AUTH_BASE_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          DB_HOST: ${{ env.DB_HOST }}
+
+      - name: Build application with Vercel
+        run: pnpm dlx vercel build ${{ inputs.production && '--prod' || '' }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          BETTER_AUTH_BASE_URL: ${{ vars.BETTER_AUTH_BASE_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          DB_HOST: ${{ env.DB_HOST }}
+
+      - name: Verify build output
+        run: |
+          if [ ! -d ".vercel/output" ]; then
+            echo "❌ .vercel/output directory not found!"
+            exit 1
+          fi
+          echo "✅ Build output verified:"
+          ls -la .vercel/output/
+          echo "📦 Build artifacts ready for deployment"
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(pnpm dlx vercel deploy --prebuilt ${{ inputs.production && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Deployed to: $DEPLOYMENT_URL"
+
+      - name: Set deployment URL
+        id: set-url
+        run: |
+          echo "deployment-url=${{ steps.deploy.outputs.url }}" >> $GITHUB_OUTPUT
