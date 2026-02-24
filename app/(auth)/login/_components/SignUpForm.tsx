@@ -97,7 +97,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                 <Button type="submit" disabled={pending} className="flex flex-row">
                   {pending && <Spinner />} Create Account
                 </Button>
-                <OrDivider />
+                {/* <OrDivider />
                 <Button
                   variant="outline"
                   type="button"
@@ -106,7 +106,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
                   onClick={signInWithGoogle}
                 >
                   {pending && <Spinner />} Sign up with Google
-                </Button>
+                </Button> */}
                 <FieldDescription className="px-6 text-center">
                   Already have an account?{' '}
                   <button

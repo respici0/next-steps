@@ -82,10 +82,10 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
               <Button type="submit" className="flex flex-row">
                 {pending && <Spinner />}Login
               </Button>
-              <OrDivider />
+              {/* <OrDivider />
               <Button variant="outline" type="button" onClick={signInWithGoogle}>
                 Login with Google
-              </Button>
+              </Button> */}
               <FieldDescription className="text-center">
                 Don&apos;t have an account?{' '}
                 <button
