@@ -1,7 +1,7 @@
 'use client';
 import { FormEvent, useRef, useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { createJob } from '@/lib/server-actions/jobApplications';
+import { createJob, updateJob } from '@/lib/server-actions/jobApplications';
 import { Button } from '@/components/ui/button';
 import { CornerDownLeft } from 'lucide-react';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -10,15 +10,30 @@ import { parseDateToMongoUTC } from '@/lib/utils/parseDateToMongoUTC';
 import { Spinner } from '@/components/ui/spinner';
 import { ColumnKey } from './JobBoard';
 import { type Job } from '@/lib/models/jobApplications';
+import { cn } from '@/lib/utils/cn';
 
 type Props = {
-  onClose: () => void;
-  onJobCreated: (status: ColumnKey, job: Job) => void;
+  onClose?: () => void;
+  onJobCreated?: (status: ColumnKey, job: Job) => void;
+  onJobUpdated?: (status: ColumnKey, job: Job) => void;
   columnKey: ColumnKey;
+  action: 'create' | 'update';
+  job?: Job;
 };
 
-export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
-  const [displayDate, setDisplayDate] = useState('');
+export default function JobForm({
+  onJobCreated,
+  onJobUpdated,
+  columnKey,
+  action,
+  job,
+  onClose,
+}: Props) {
+  const [displayDate, setDisplayDate] = useState(
+    job?.appliedAt
+      ? `${(job.appliedAt.getUTCMonth() + 1).toString().padStart(2, '0')}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`
+      : '',
+  );
   const [isPending, setIsPending] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -40,35 +55,44 @@ export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
     (e.target as HTMLInputElement).setCustomValidity('Enter a valid date (MM/DD/YYYY)');
   }
 
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-
-    const formData = new FormData(e.currentTarget);
-    if (displayDate) {
-      const utcDate = parseDateToMongoUTC(displayDate);
-      formData.set('appliedAt', utcDate);
-    }
-    formData.set('status', columnKey);
-
+  async function handleFormAction(formData: FormData): Promise<void> {
     setIsPending(true);
-    const result = await createJob(formData);
+    try {
+      if (displayDate) {
+        formData.set('appliedAt', parseDateToMongoUTC(displayDate));
+      }
+      formData.set('status', columnKey);
 
-    if (!result.success) {
-      console.error(result.error);
+      if (action === 'create') {
+        const result = await createJob(formData);
+        if (!result.success || !result.job) {
+          console.error(result.error);
+          return;
+        }
+        onJobCreated?.(columnKey, result.job);
+        formRef.current?.reset();
+        setDisplayDate('');
+        return;
+      }
+
+      if (action === 'update' && job?._id) {
+        const result = await updateJob(job._id, formData);
+        if (!result.success || !result.job) {
+          console.error(result.error);
+          return;
+        }
+        onJobUpdated?.(columnKey, result.job);
+        onClose?.();
+      }
+    } finally {
       setIsPending(false);
     }
-
-    if (result.success && result.job) {
-      onJobCreated(columnKey, result.job);
-      formRef?.current?.reset();
-      setIsPending(false);
-    }
-  };
+  }
 
   return (
     <>
-      <Card className="bg-white rounded-md shadow pb-2.5">
-        <form onSubmit={handleFormSubmit} ref={formRef}>
+      <Card className="bg-white rounded-md shadow pb-2.5 mb-2">
+        <form key={job?._id || 'create'} action={handleFormAction} ref={formRef}>
           <CardContent>
             <FieldGroup className="gap-1">
               <Field className="gap-1">
@@ -80,6 +104,7 @@ export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
                   type="text"
                   name="jobTitle"
                   placeholder="Job title (e.g., Software Engineer)"
+                  defaultValue={job?.jobTitle ?? ''}
                   required
                 />
               </Field>
@@ -92,6 +117,7 @@ export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
                   type="text"
                   name="company"
                   placeholder="Company name (e.g., Acme Corp)"
+                  defaultValue={job?.company ?? ''}
                   required
                 />
               </Field>
@@ -105,6 +131,7 @@ export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
                   type="text"
                   name="jobUrl"
                   placeholder="Job link (e.g., https://example.com)"
+                  defaultValue={job?.jobUrl ?? ''}
                 />
               </Field>
               <Field className="gap-1">
@@ -116,6 +143,7 @@ export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
                   type="text"
                   name="notes"
                   placeholder="Notes (e.g., concerns, next steps, reminders)"
+                  defaultValue={job?.notes ?? ''}
                 />
               </Field>
               <Field className="gap-1">
@@ -139,7 +167,20 @@ export default function CreateJobForm({ onJobCreated, columnKey }: Props) {
               </Field>
             </FieldGroup>
           </CardContent>
-          <CardFooter className="flex justify-end mt-4">
+          <CardFooter
+            className={cn('flex justify-end mt-4', action === 'update' && 'justify-between')}
+          >
+            {action === 'update' && (
+              <Button
+                type="button"
+                variant="outline"
+                className="cursor-pointer"
+                onClick={onClose}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+            )}
             <Button type="submit" className="cursor-pointer" disabled={isPending}>
               {isPending ? <Spinner /> : <CornerDownLeft />}
             </Button>
