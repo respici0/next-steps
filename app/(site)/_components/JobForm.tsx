@@ -5,12 +5,19 @@ import { createJob, updateJob } from '@/lib/server-actions/jobApplications';
 import { Button } from '@/components/ui/button';
 import { CornerDownLeft } from 'lucide-react';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { parseDateToMongoUTC } from '@/lib/utils/parseDateToMongoUTC';
 import { Spinner } from '@/components/ui/spinner';
-import { ColumnKey } from './JobBoard';
+import { type ColumnKey } from './JobBoard';
 import { type Job } from '@/lib/models/jobApplications';
-import { cn } from '@/lib/utils/cn';
 
 type Props = {
   onClose?: () => void;
@@ -20,6 +27,30 @@ type Props = {
   action: 'create' | 'update';
   job?: Job;
 };
+
+type ColumnKeyOptions = {
+  key: ColumnKey;
+  value: string;
+};
+
+const COLUMN_KEYS: ColumnKeyOptions[] = [
+  {
+    key: 'applied',
+    value: 'Applied',
+  },
+  {
+    key: 'interviewing',
+    value: 'Interviewing',
+  },
+  {
+    key: 'offered',
+    value: 'Offered',
+  },
+  {
+    key: 'rejected',
+    value: 'Rejected',
+  },
+];
 
 export default function JobForm({
   onJobCreated,
@@ -31,7 +62,7 @@ export default function JobForm({
 }: Props) {
   const [displayDate, setDisplayDate] = useState(
     job?.appliedAt
-      ? `${(job.appliedAt.getUTCMonth() + 1).toString().padStart(2, '0')}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`
+      ? `${(job.appliedAt.getUTCMonth() + 1).toString().padStart(2, '0')}/${job.appliedAt.getUTCDate().toString().padStart(2, '0')}/${job.appliedAt.getUTCFullYear()}`
       : '',
   );
   const [isPending, setIsPending] = useState(false);
@@ -61,7 +92,6 @@ export default function JobForm({
       if (displayDate) {
         formData.set('appliedAt', parseDateToMongoUTC(displayDate));
       }
-      formData.set('status', columnKey);
 
       if (action === 'create') {
         const result = await createJob(formData);
@@ -95,8 +125,30 @@ export default function JobForm({
         <form key={job?._id || 'create'} action={handleFormAction} ref={formRef}>
           <CardContent>
             <FieldGroup className="gap-1">
+              {action === 'update' ? (
+                <Field className="gap-1">
+                  <FieldLabel htmlFor="status" aria-required={true}>
+                    Status<span className="text-xs font-medium opacity-65">(required)</span>
+                  </FieldLabel>
+                  <Select defaultValue={job?.status} name="status">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a status"></SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {COLUMN_KEYS.map(({ key, value }) => (
+                          <SelectItem value={key} key={key}>
+                            {value}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              ) : null}
+
               <Field className="gap-1">
-                <FieldLabel htmlFor="position" aria-required={true}>
+                <FieldLabel htmlFor="jobTitle" aria-required={true}>
                   Job title<span className="text-xs font-medium opacity-65">(required)</span>
                 </FieldLabel>
                 <Input
@@ -167,20 +219,17 @@ export default function JobForm({
               </Field>
             </FieldGroup>
           </CardContent>
-          <CardFooter
-            className={cn('flex justify-end mt-4', action === 'update' && 'justify-between')}
-          >
-            {action === 'update' && (
-              <Button
-                type="button"
-                variant="outline"
-                className="cursor-pointer"
-                onClick={onClose}
-                disabled={isPending}
-              >
-                Cancel
-              </Button>
-            )}
+          <CardFooter className="flex  mt-4 justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              className="cursor-pointer"
+              onClick={onClose}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+
             <Button type="submit" className="cursor-pointer" disabled={isPending}>
               {isPending ? <Spinner /> : <CornerDownLeft />}
             </Button>
