@@ -42,7 +42,7 @@ export async function createUserWithEmail(formData: FormData) {
   }
 }
 
-export async function loginUser(formData: FormData) {
+export async function loginUserWithEmail(formData: FormData) {
   try {
     const authServer = await getAuth();
 
