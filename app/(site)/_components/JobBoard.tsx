@@ -33,7 +33,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
 
   const { width } = useWindowSize();
 
-  const renderMobileBoard = width <= 768 && width !== 0;
+  const renderMobileBoard = width <= 768;
 
   const columnConfigs: ColumnConfig[] = [
     {
@@ -90,12 +90,17 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   }
 
   function updateJob(status: ColumnKey, job: Job) {
-    setJobsByStatus((prev) => {
-      return {
-        ...prev,
-        [status]: replaceJob(prev[status], job),
-      };
-    });
+    console.log(status, job.status);
+    if (status !== job.status) {
+      moveJob(job._id, job.status);
+    } else {
+      setJobsByStatus((prev) => {
+        return {
+          ...prev,
+          [status]: replaceJob(prev[status], job),
+        };
+      });
+    }
   }
 
   function removeJobFromColumn(jobId: string) {
@@ -153,7 +158,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
 
   if (renderMobileBoard) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="space-y-4">
         <h1 className="sr-only">Job Application Board</h1>
         <Tabs defaultValue="applied" value={activeMobileColumn} onValueChange={scrollToColumn}>
           <TabsList>
@@ -173,6 +178,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
                   count={jobs.length}
                   columnKey={columnKey}
                   openCreateForm={column === columnKey}
+                  onCreateClose={() => setColumn('')}
                   handleCreateForm={handleCreateForm}
                   onJobCreated={createJob}
                   onDragOver={handleDragOver}

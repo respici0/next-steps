@@ -14,6 +14,7 @@ type Props = {
   onJobCreated: (status: ColumnKey, job: Job) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, toColumn: ColumnKey) => void;
+  onCreateClose?: () => void;
   children: React.ReactNode;
 };
 
@@ -26,6 +27,7 @@ export default function JobColumn({
   onJobCreated,
   onDragOver,
   onDrop,
+  onCreateClose,
   children,
 }: Props) {
   return (
@@ -40,11 +42,20 @@ export default function JobColumn({
         <span className="text-sm">( {count} )</span>
       </h2>
       <div
-        className={cn(count && 'overflow-auto py-1 px-2 max-h-[calc(100vh-10.5rem)]', 'py-1 px-2')}
+        className={cn(
+          count &&
+            'overflow-auto py-1 px-2 max-h-[calc(100vh-14rem)] md:max-h-[calc(100vh-10.5rem)]',
+          'py-1 px-2',
+        )}
       >
         {children}
         {openCreateForm && (
-          <JobForm columnKey={columnKey} onJobCreated={onJobCreated} action="create" />
+          <JobForm
+            columnKey={columnKey}
+            onJobCreated={onJobCreated}
+            action="create"
+            onClose={onCreateClose}
+          />
         )}
       </div>
       {!openCreateForm && (

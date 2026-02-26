@@ -9,11 +9,11 @@ import JobApplications, { type Job } from '../models/jobApplications';
 // };
 
 async function getUserId(): Promise<string> {
-  const { id } = await getUser();
-  if (!id) {
+  const response = await getUser();
+  if (!response.id) {
     throw new Error('Unable to authorize user session');
   }
-  return id;
+  return response.id;
 }
 
 export async function getAllJobApplications(): Promise<Job[]> {
