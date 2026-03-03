@@ -1,6 +1,6 @@
 'use client';
 import { type Job } from '@/lib/models/jobApplications';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Card,
   CardAction,
@@ -13,7 +13,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { daysSinceUtc } from '@/lib/utils/calculateDaysPastFromMongoUTC';
-import { SquarePen, Archive } from 'lucide-react';
+import { MoreHorizontal, SquarePen, Archive } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import JobForm from './JobForm';
 import { type ColumnKey } from './JobBoard';
 
@@ -27,7 +34,14 @@ type Props = {
 
 export function JobCard({ job, handleDragStart, onJobUpdated, onJobArchived, columnKey }: Props) {
   const [openUpdateForm, setOpenUpdateForm] = useState(false);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const titleRef = useRef<HTMLSpanElement>(null);
   const id = String((job as Job)._id ?? '');
+
+  useEffect(() => {
+    const el = titleRef.current;
+    if (el) setIsTruncated(el.scrollWidth > el.offsetWidth);
+  }, [job.jobTitle]);
   const appliedAt = `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`;
 
   return (
@@ -40,10 +54,20 @@ export function JobCard({ job, handleDragStart, onJobUpdated, onJobArchived, col
           className="bg-white rounded-md mb-2 shadow cursor-grab gap-1 font-sans py-4"
         >
           <CardHeader>
-            <CardTitle className="flex flex-col">
-              <span className="font-semibold text-2xl text-shadow-black">
-                {job.jobTitle ?? 'Untitled'}
-              </span>
+            <CardTitle className="flex flex-col min-w-0">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      ref={titleRef}
+                      className="font-semibold text-2xl text-shadow-black truncate"
+                    >
+                      {job.jobTitle ?? 'Untitled'}
+                    </span>
+                  </TooltipTrigger>
+                  {isTruncated && <TooltipContent>{job.jobTitle ?? 'Untitled'}</TooltipContent>}
+                </Tooltip>
+              </TooltipProvider>
               <span className="text-sm font-medium text-muted-foreground">{job.company ?? ''}</span>
             </CardTitle>
             {job?.jobUrl && (
@@ -56,12 +80,23 @@ export function JobCard({ job, handleDragStart, onJobUpdated, onJobArchived, col
               </CardDescription>
             )}
             <CardAction>
-              <Button variant="ghost" onClick={() => setOpenUpdateForm((prev) => !prev)}>
-                <SquarePen />
-              </Button>
-              <Button variant="ghost" onClick={() => onJobArchived(id, columnKey)}>
-                <Archive />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setOpenUpdateForm((prev) => !prev)}>
+                    <SquarePen className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onJobArchived(id, columnKey)}>
+                    <Archive className="mr-2 h-4 w-4" />
+                    Archive
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </CardAction>
           </CardHeader>
           <CardContent>

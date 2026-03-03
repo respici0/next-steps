@@ -39,7 +39,6 @@ type Ids = { _id: string; userId: string };
 export type Job = Ids & Omit<JobApplicationsDoc, '_id' | 'userId'>;
 export type ArchivedJob = Job & { archivedAt: Date; previousStatus: string };
 
-
 const JobApplications =
   (mongoose.models.JobApplication as mongoose.Model<JobApplicationsDoc>) ||
   mongoose.model('JobApplication', jobApplicationSchema);

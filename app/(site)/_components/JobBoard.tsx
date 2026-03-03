@@ -100,7 +100,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         };
       });
     }
-   }
+  }
 
   function removeJobFromColumn(jobId: string) {
     setJobsByStatus((prev) => {
