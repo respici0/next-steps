@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import JobColumn from './JobColumn';
-import { updateJobStatus } from '@/lib/server-actions/jobApplications';
+import { updateJobStatus, archiveJob } from '@/lib/server-actions/jobApplications';
 import { JobCard } from './JobCard';
 
 export type ColumnKey = 'applied' | 'interviewing' | 'offered' | 'rejected';
@@ -69,6 +69,11 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
     });
   }
 
+  function handleArchiveJob(jobId: string, fromColumn: ColumnKey) {
+    removeJobFromColumn(jobId);
+    archiveJob(jobId, fromColumn);
+  }
+
   function moveJob(jobId: string, toColumn: ColumnKey) {
     const job = cachedJobsById.get(jobId);
     const addJobToColumn = createJob;
@@ -116,6 +121,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
             key={String((job as Job)._id ?? '')}
             job={job}
             onJobUpdated={updateJob}
+            onJobArchived={handleArchiveJob}
             handleDragStart={handleDragStart}
             columnKey="applied"
           />
@@ -134,8 +140,9 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         {jobsByStatus['interviewing'].map((job) => (
           <JobCard
             key={String((job as Job)._id ?? '')}
-            onJobUpdated={updateJob}
             job={job}
+            onJobUpdated={updateJob}
+            onJobArchived={handleArchiveJob}
             handleDragStart={handleDragStart}
             columnKey="interviewing"
           />
@@ -154,8 +161,9 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         {jobsByStatus['offered'].map((job) => (
           <JobCard
             key={String((job as Job)._id ?? '')}
-            onJobUpdated={updateJob}
             job={job}
+            onJobUpdated={updateJob}
+            onJobArchived={handleArchiveJob}
             handleDragStart={handleDragStart}
             columnKey="offered"
           />
@@ -174,8 +182,9 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
         {jobsByStatus['rejected'].map((job) => (
           <JobCard
             key={String((job as Job)._id ?? '')}
-            onJobUpdated={updateJob}
             job={job}
+            onJobUpdated={updateJob}
+            onJobArchived={handleArchiveJob}
             handleDragStart={handleDragStart}
             columnKey="rejected"
           />

@@ -13,18 +13,19 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { daysSinceUtc } from '@/lib/utils/calculateDaysPastFromMongoUTC';
-import { SquarePen } from 'lucide-react';
+import { SquarePen, Archive } from 'lucide-react';
 import JobForm from './JobForm';
 import { type ColumnKey } from './JobBoard';
 
 type Props = {
   job: Job;
   onJobUpdated: (status: ColumnKey, job: Job) => void;
+  onJobArchived: (jobId: string, columnKey: ColumnKey) => void;
   handleDragStart: (e: React.DragEvent, id: string) => void;
   columnKey: ColumnKey;
 };
 
-export function JobCard({ job, handleDragStart, onJobUpdated, columnKey }: Props) {
+export function JobCard({ job, handleDragStart, onJobUpdated, onJobArchived, columnKey }: Props) {
   const [openUpdateForm, setOpenUpdateForm] = useState(false);
   const id = String((job as Job)._id ?? '');
   const appliedAt = `${job.appliedAt.getUTCMonth() + 1}/${job.appliedAt.getUTCDate()}/${job.appliedAt.getUTCFullYear()}`;
@@ -57,6 +58,9 @@ export function JobCard({ job, handleDragStart, onJobUpdated, columnKey }: Props
             <CardAction>
               <Button variant="ghost" onClick={() => setOpenUpdateForm((prev) => !prev)}>
                 <SquarePen />
+              </Button>
+              <Button variant="ghost" onClick={() => onJobArchived(id, columnKey)}>
+                <Archive />
               </Button>
             </CardAction>
           </CardHeader>

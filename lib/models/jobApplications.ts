@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { ARCHIVE_TTL_DAYS } from '../constants';
+export { ARCHIVE_TTL_DAYS };
 
 const jobApplicationSchema = new mongoose.Schema(
   {
@@ -11,12 +13,18 @@ const jobApplicationSchema = new mongoose.Schema(
     jobTitle: { type: String, required: true },
     status: {
       type: String,
-      enum: ['applied', 'interviewing', 'offered', 'rejected'],
+      enum: ['applied', 'interviewing', 'offered', 'rejected', 'archived'],
       default: 'applied',
     },
     appliedAt: { type: Date, default: Date.now },
     notes: { type: String },
     jobUrl: { type: String },
+    archivedAt: { type: Date, default: null },
+    previousStatus: {
+      type: String,
+      enum: ['applied', 'interviewing', 'offered', 'rejected'],
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -29,6 +37,8 @@ export type JobApplicationsDoc = mongoose.InferSchemaType<typeof jobApplicationS
 
 type Ids = { _id: string; userId: string };
 export type Job = Ids & Omit<JobApplicationsDoc, '_id' | 'userId'>;
+export type ArchivedJob = Job & { archivedAt: Date; previousStatus: string };
+
 
 const JobApplications =
   (mongoose.models.JobApplication as mongoose.Model<JobApplicationsDoc>) ||
