@@ -197,13 +197,13 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
           <Tabs defaultValue="applied" value={activeMobileColumn} onValueChange={scrollToColumn}>
             <TabsList>
               {columnConfigs.map(({ name, columnKey, jobs }) => (
-                <TabsTrigger key={`tab-trigger-${columnKey}`} value={columnKey}>
-                  {name}&nbsp;
-                  {isFiltered ? (
-                    <div className="flex items-center justify-center size-5 bg-black text-white rounded-full">
-                      {jobs.length}
-                    </div>
-                  ) : null}
+                <TabsTrigger
+                  key={`tab-trigger-${columnKey}`}
+                  value={columnKey}
+                  className="text-xs p-1 sm:text-sm sm:p-2"
+                >
+                  {name}
+                  {isFiltered ? <span>({jobs.length})</span> : null}
                 </TabsTrigger>
               ))}
             </TabsList>

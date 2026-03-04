@@ -12,12 +12,12 @@ export default async function SiteLayout({
 
   if (user) {
     return (
-      <>
+      <div className="min-w-92.5">
         <header className="sticky top-0 z-50 bg-white/90 backdrop-blur">
           <NavBar user={user} />
         </header>
         {children}
-      </>
+      </div>
     );
   } else {
     redirect('/login');

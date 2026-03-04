@@ -6,12 +6,12 @@ import { CardContent, CardDescription, CardHeader, CardTitle } from '@/component
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import OrDivider from './OrDivider';
+// import OrDivider from './OrDivider';
 import { z } from 'zod';
 import { createUserWithEmail } from '@/lib/server-actions/login';
 import ErrorList from './ErrorList';
 import { redirect } from 'next/navigation';
-import { getFieldErrors, signInWithGoogle } from '../_utils';
+import { getFieldErrors } from '../_utils';
 
 export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
   const [formErrors, setFormErrors] = useState<z.core.$ZodIssue[] | undefined>(undefined);
