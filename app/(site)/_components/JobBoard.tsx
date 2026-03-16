@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { type Job } from '@/lib/models/jobApplications';
 import JobColumn from './JobColumn';
-import { updateJobStatus } from '@/lib/server-actions/jobApplications';
+import { updateJobStatus, archiveJob } from '@/lib/server-actions/jobApplications';
 import { JobCard } from './JobCard';
 import { useWindowSize } from '@/lib/hooks';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -90,8 +90,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
   }
 
   function updateJob(status: ColumnKey, job: Job) {
-    console.log(status, job.status);
-    if (status !== job.status) {
+    if (status !== job.status && job.status !== 'archived') {
       moveJob(job._id, job.status);
     } else {
       setJobsByStatus((prev) => {
@@ -115,6 +114,11 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
 
       return obj;
     });
+  }
+
+  function handleArchiveJob(jobId: string, fromColumn: ColumnKey) {
+    removeJobFromColumn(jobId);
+    archiveJob(jobId, fromColumn);
   }
 
   function moveJob(jobId: string, toColumn: ColumnKey) {
@@ -189,6 +193,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
                       key={String((job as Job)._id ?? '')}
                       job={job}
                       onJobUpdated={updateJob}
+                      onJobArchived={handleArchiveJob}
                       handleDragStart={handleDragStart}
                       columnKey={columnKey}
                     />
@@ -221,6 +226,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
                 key={String((job as Job)._id ?? '')}
                 job={job}
                 onJobUpdated={updateJob}
+                onJobArchived={handleArchiveJob}
                 handleDragStart={handleDragStart}
                 columnKey={columnKey}
               />

@@ -18,7 +18,10 @@ export function NavBar({ user }: { user: User | null }) {
     <nav className="border-b-2">
       <div className="px-4 py-1 flex items-center justify-between">
         <Link href="/">
-          <p className="text-black">Logo</p>
+          <p className="text-black font-sans">
+            <span className="font-extrabold">N</span>ext<span className="font-extrabold">S</span>
+            teps
+          </p>
         </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -29,7 +32,12 @@ export function NavBar({ user }: { user: User | null }) {
               <span className="text-black font-bold uppercase">{firstLetter}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-40" align="start">
+          <DropdownMenuContent className="w-40 mt-1 mr-1" align="start">
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href="/archived">View Archived</Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={logoutUser}>Log out</DropdownMenuItem>
             </DropdownMenuGroup>
