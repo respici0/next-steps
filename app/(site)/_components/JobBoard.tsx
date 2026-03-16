@@ -169,20 +169,14 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
             {columnConfigs.map(({ name, columnKey }) => (
               <TabsTrigger key={`tab-trigger-${columnKey}`} value={columnKey}>
                 {name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        <Carousel setApi={setCarouselApi}>
-          <CarouselContent>
-            {columnConfigs.map(({ name, jobs, columnKey }) => (
+              </TabsTrigger>))} </TabsList> </Tabs> <Carousel setApi={setCarouselApi}> <CarouselContent> {columnConfigs.map(({ name, jobs, columnKey }) => (
               <CarouselItem key={columnKey} id={columnKey}>
                 <JobColumn
                   name={name}
                   count={jobs.length}
                   columnKey={columnKey}
                   openCreateForm={column === columnKey}
-                  onCreateClose={() => setColumn('')}
+                  onCreateClose={() => {setColumn('')}}
                   handleCreateForm={handleCreateForm}
                   onJobCreated={createJob}
                   onDragOver={handleDragOver}
@@ -216,6 +210,7 @@ export function JobBoard({ jobs }: { jobs: Job[] }) {
             count={jobs.length}
             columnKey={columnKey}
             openCreateForm={column === columnKey}
+            onCreateClose={() => {setColumn('')}}
             handleCreateForm={handleCreateForm}
             onJobCreated={createJob}
             onDragOver={handleDragOver}
