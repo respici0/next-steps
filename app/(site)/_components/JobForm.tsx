@@ -86,7 +86,9 @@ export default function JobForm({
     (e.target as HTMLInputElement).setCustomValidity('Enter a valid date (MM/DD/YYYY)');
   }
 
-  async function handleFormAction(formData: FormData): Promise<void> {
+  async function handleFormAction(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     setIsPending(true);
     try {
       if (displayDate) {
@@ -122,7 +124,7 @@ export default function JobForm({
   return (
     <>
       <Card className="bg-white rounded-md shadow pb-2.5 mb-2">
-        <form key={job?._id || 'create'} action={handleFormAction} ref={formRef}>
+        <form key={job?._id || 'create'} onSubmit={handleFormAction} ref={formRef}>
           <CardContent>
             <FieldGroup className="gap-1">
               {action === 'update' ? (
